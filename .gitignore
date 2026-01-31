@@ -1,0 +1,6 @@
+# Backend
+Backend/node_modules/
+Backend/.env
+
+# Optional build output
+Backend/dist/
