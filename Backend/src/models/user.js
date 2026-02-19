@@ -5,21 +5,26 @@ const userSchema = new mongoose.Schema(
         {
             name: {
                 type: String,
-                required: true,
+                required: [true,'please enter your name']
             },
             email: {
                 type: String,
-                required: true,
+                required: [true,'please enter your email'],
                 unique: true
             },
             password: {
                 type: String,
-                required: true,
+                required: [true,'please enter your password']
             },
             role: {
                 type: String,
-                enum: ['customer', 'employee', 'admin'],
-                default: 'customer'
+                enum: ['user','manager', 'employee', 'admin'],
+                default: 'user'
+            },
+            businessId: {
+                type : mongoose.Schema.Types.ObjectId,
+                ref: 'Business',
+                default: null,
             }
         }, {
         timestamps: true

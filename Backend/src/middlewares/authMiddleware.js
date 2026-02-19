@@ -1,6 +1,7 @@
 import jwt from 'jsonwebtoken';
 import User from '../models/user.js';
 
+//authentication
 export const protect = async (req, res, next) => {
     let token;
   if (
@@ -16,11 +17,23 @@ export const protect = async (req, res, next) => {
       return next(); 
     } catch (error) {
       console.error(error);
-      res.status(401).json({ message: 'Not authorized, token failed' });
+      return res.status(401).json({ message: 'Not authorized, token failed' });
     }
   }
 
-  if (!token) {
-    res.status(401).json({ message: 'Not authorized, no token' });
-  }
+     return res.status(401).json({ message: 'Not authorized, no token' });
+};
+
+//authorization
+export const authorize = (...roles) => {
+    
+    return (req, res, next) => {
+        
+        if (!roles.includes(req.user.role)) {
+            return res.status(403).json({ 
+                message: "You do not have permission to perform this action" 
+            });
+        }
+        next();
+    };
 };
