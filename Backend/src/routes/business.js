@@ -3,10 +3,11 @@ import { createBusiness ,
     getBusinesses , 
     getBusiness , 
     updateBusiness ,
-    deleteBusiness
+    deleteBusiness,
+    verifyBusiness
 }
     from '../controllers/business.js'
-import { protect  } from '../middlewares/authMiddleware.js';
+import { protect , authorize } from '../middlewares/authMiddleware.js';
 import upload from '../middlewares/uploadMiddleware.js';
 
 const router = express.Router()
@@ -20,6 +21,7 @@ router.post('/', protect, upload.fields([
 ]),createBusiness)
 router.patch('/:id', protect, updateBusiness)
 router.delete('/:id', protect , deleteBusiness)
+router.patch('/:id/verify', protect, authorize('admin'), verifyBusiness);
 
 
 export default router;

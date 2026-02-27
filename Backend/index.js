@@ -1,6 +1,8 @@
 import dotenv from 'dotenv'
 dotenv.config();
 
+import './src/subscribers/bookingSubscriber.js';
+
 import express from 'express'
 import connectToMongoDB from './src/config/database.js'
 import authRoutes from './src/routes/auth.js'

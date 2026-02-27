@@ -1,3 +1,5 @@
+import eventBus from '../utils/eventBus.js';
+
 import Booking from '../models/booking.js';
 import Service from '../models/service.js';
 import Business from '../models/business.js';
@@ -54,13 +56,15 @@ export const createBooking = async (req, res) => {
             serviceId: service._id,
             date: startTime,
             endTime: endTime,
-            status: 'pending'
+            status: 'pending',
         });
 
         res.status(201).json({
             success: true,
             data: booking
         });
+
+        eventBus.emit('bookingCreated', booking);
 
     } catch (error) {
         res.status(500).json({ message: error.message });

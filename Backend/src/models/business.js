@@ -27,7 +27,11 @@ const businessSchema = new mongoose.Schema(
                 'Other'
             ]
         },
-
+        city: {
+            type: String,
+            required: [true, 'Please add a city'],
+            trim: true
+        },
         address: {
             type: String,
             required: [true, 'Please add an address']

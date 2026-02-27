@@ -57,18 +57,40 @@ export const createBusiness = async (req, res) => {
 
 export const getBusinesses = async (req, res) => {
   try {
+    let queryObj = { ...req.query };
 
-    let query = {};
-    
-    if (req.query.category) {
-      query.category = req.query.category;
+    const excludedFields = ['page', 'sort', 'limit', 'fields'];
+    excludedFields.forEach(el => delete queryObj[el]);
+
+    let queryStr = JSON.stringify(queryObj);
+    queryStr = queryStr.replace(/\b(gt|gte|lt|lte|in)\b/g, match => `$${match}`);
+
+    let query = Business.find(JSON.parse(queryStr));
+
+    if (req.query.sort) {
+      const sortBy = req.query.sort.split(',').join(' ');
+      query = query.sort(sortBy);
+    } else {
+      query = query.sort('-createdAt');
     }
 
-    const businesses = await Business.find(query);
+    const page = parseInt(req.query.page, 10) || 1; 
+    const limit = parseInt(req.query.limit, 10) || 10; 
+    const skip = (page - 1) * limit;
+
+    query = query.skip(skip).limit(limit);
+
+    const businesses = await query;
+    const total = await Business.countDocuments(JSON.parse(queryStr));
 
     res.status(200).json({
       success: true,
       count: businesses.length,
+      pagination: {
+        currentPage: page,
+        totalPages: Math.ceil(total / limit),
+        totalResults: total
+      },
       data: businesses
     });
   } catch (error) {
@@ -145,6 +167,28 @@ export const deleteBusiness = async (req, res) => {
 
         res.status(200).json({ success: true, data: {} });
 
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+export const verifyBusiness = async (req, res) => {
+    try {
+        const business = await Business.findByIdAndUpdate(
+            req.params.id, 
+            { isVerified: true }, 
+            { new: true, runValidators: true }
+        );
+
+        if (!business) {
+            return res.status(404).json({ message: 'Business not found' });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: 'Business has been verified and is now public.',
+            data: business
+        });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
