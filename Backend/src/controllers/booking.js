@@ -58,7 +58,7 @@ export const createBooking = async (req, res) => {
             endTime: endTime,
             status: 'pending',
         });
-
+ 
         res.status(201).json({
             success: true,
             data: booking
