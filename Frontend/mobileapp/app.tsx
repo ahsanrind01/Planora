@@ -1,25 +1,6 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import React from 'react';
+import AppNavigator from './src/navigation/AppNavigator';
 
 export default function App() {
-  return (
-    <View style={styles.container}>
-      <Text style={styles.text}>Planora Mobile Architecture is Online! 🚀</Text>
-      <StatusBar style="auto" />
-    </View>
-  );
+  return <AppNavigator />;
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#1e1e1e',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  text: {
-    color: '#00ffcc',
-    fontSize: 20,
-    fontWeight: 'bold'
-  }
-});

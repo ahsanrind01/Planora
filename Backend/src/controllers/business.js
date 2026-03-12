@@ -59,8 +59,17 @@ export const getBusinesses = async (req, res) => {
   try {
     let queryObj = { ...req.query };
 
-    const excludedFields = ['page', 'sort', 'limit', 'fields'];
+    const excludedFields = ['page', 'sort', 'limit', 'fields', 'search'];
     excludedFields.forEach(el => delete queryObj[el]);
+
+    if (req.query.search) {
+        const keyword = req.query.search;
+        queryObj.$or = [
+            { name: { $regex: keyword, $options: 'i' } },       
+            { category: { $regex: keyword, $options: 'i' } },
+            { city: { $regex: keyword, $options: 'i' } }
+        ];
+    }
 
     let queryStr = JSON.stringify(queryObj);
     queryStr = queryStr.replace(/\b(gt|gte|lt|lte|in)\b/g, match => `$${match}`);
@@ -101,8 +110,7 @@ export const getBusinesses = async (req, res) => {
 
 export const getBusiness = async (req, res) => {
   try {
-    const business = await Business.findById(req.params.id); // population of services later add
-
+    const business = await Business.findById(req.params.id); 
     if (!business) {
       return res.status(404).json({ message: 'Business not found' });
     }
@@ -158,7 +166,6 @@ export const deleteBusiness = async (req, res) => {
             return res.status(403).json({ message: 'Not authorized' });
         }
 
-        // 1. Deleting the Business
         await business.deleteOne();
 
         // 2. FUTURE STEP: Cascade Delete Services

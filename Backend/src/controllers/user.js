@@ -1,5 +1,6 @@
 import User from '../models/user.js'
 import jwt from 'jsonwebtoken';
+import bcrypt from 'bcrypt';
 
 export const getMe = async (req, res) => {
     try {
@@ -68,22 +69,25 @@ export const updateProfile = async (req, res) => {
 
 export const updatePassword = async (req, res) => {
     try {
-        const { password } = req.body;
+        const { currentPassword, newPassword } = req.body;
 
-        if (!password) {
-            return res.status(400).json({ message: 'Missing required field' });
+        if (!currentPassword || !newPassword) {
+            return res.status(400).json({ message: 'Please provide both current and new passwords' });
         }
 
-        const user= await User.findById(req.user._id)
+        const user = await User.findById(req.user._id).select('+password');
 
-        if(!user){
-            res.status(404).json({message: 'user not found'})
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        const isMatch = await bcrypt.compare(currentPassword, user.password);
+        
+        if (!isMatch) {
+            return res.status(401).json({ message: 'The current password you entered is incorrect.' });
         }
 
-        user.password= password;
-
+        user.password = newPassword;
         await user.save();
-
 
         const token = jwt.sign(
             { id: user._id },
@@ -91,16 +95,12 @@ export const updatePassword = async (req, res) => {
             { expiresIn: '30d' }
         );
 
-        if (user) {
-            res.status(201).json({
-                id: user._id,
-                name: user.name,
-                email: user.email,
-                token
-            })
-        } else {
-            res.status(400).json({ message: "invalid user data" })
-        }
+        res.status(200).json({
+            id: user._id,
+            name: user.name,
+            email: user.email,
+            token
+        });
 
     } catch (error) {
         res.status(500).json({ message: error.message });
