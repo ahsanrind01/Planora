@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
     View,
     Text,
@@ -9,21 +9,28 @@ import {
     ActivityIndicator,
     Alert
 } from 'react-native';
-import { useFocusEffect } from '@react-navigation/native'; 
+import { useFocusEffect, useNavigation } from '@react-navigation/native'; // 🚨 NEW: Added useNavigation
 import { LinearGradient } from 'expo-linear-gradient';
-import { Calendar, Clock, MapPin } from 'lucide-react-native';
+import { Calendar, Clock, MapPin, Lock } from 'lucide-react-native'; // 🚨 NEW: Added Lock icon
 
 import { useAppointmentStore } from '../../core/store/appointmentStore';
+import { useAuthStore } from '../../core/store/authStore'; // 🚨 NEW: Added Auth Store
 
 export default function AppointmentsScreen() {
+    const navigation = useNavigation();
+    const user = useAuthStore(state => state.user); // 🚨 NEW: Get the user
+
     const [activeTab, setActiveTab] = useState("upcoming");
 
     const { appointments, isLoading, error, fetchMyAppointments, cancelBooking } = useAppointmentStore();
 
     useFocusEffect(
         useCallback(() => {
-            fetchMyAppointments();
-        }, [])
+            // 🚨 THE FIX: Only try to fetch appointments if the user is actually logged in!
+            if (user) {
+                fetchMyAppointments();
+            }
+        }, [user])
     );
 
     const upcomingAppointments = appointments.filter(app =>
@@ -40,7 +47,6 @@ export default function AppointmentsScreen() {
         const d = new Date(isoString);
 
         const dateStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-
         const timeStr = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
 
         return { date: dateStr, time: timeStr };
@@ -70,6 +76,32 @@ export default function AppointmentsScreen() {
             default: return { bg: '#f1f5f9', text: '#475569' };
         }
     };
+
+    // 🚨 THE BOUNCER: If they aren't logged in, show this instead of the list!
+    if (!user) {
+        return (
+            <View style={[styles.container, { justifyContent: 'center', alignItems: 'center', padding: 20 }]}>
+                <View style={{ width: 80, height: 80, borderRadius: 40, backgroundColor: '#ffe4e6', justifyContent: 'center', alignItems: 'center', marginBottom: 20 }}>
+                    <Calendar color="#f43f5e" size={40} />
+                </View>
+                <Text style={{ fontSize: 24, fontWeight: '700', color: '#0f172a', marginBottom: 10, textAlign: 'center' }}>
+                    Your Appointments
+                </Text>
+                <Text style={{ fontSize: 16, color: '#64748b', textAlign: 'center', marginBottom: 30, paddingHorizontal: 20 }}>
+                    Log in or sign up to view and manage your upcoming bookings.
+                </Text>
+                
+                <TouchableOpacity 
+                    style={{ width: '100%', borderRadius: 16, overflow: 'hidden' }}
+                    onPress={() => navigation.navigate('Auth')}
+                >
+                    <LinearGradient colors={['#f43f5e', '#fb7185']} style={{ height: 56, justifyContent: 'center', alignItems: 'center' }}>
+                        <Text style={{ color: '#ffffff', fontSize: 16, fontWeight: '700' }}>Log In / Sign Up</Text>
+                    </LinearGradient>
+                </TouchableOpacity>
+            </View>
+        );
+    }
 
     return (
         <View style={styles.container}>

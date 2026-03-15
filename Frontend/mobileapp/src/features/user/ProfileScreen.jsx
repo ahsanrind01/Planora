@@ -12,17 +12,16 @@ import {
     KeyboardAvoidingView,
     Platform
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { User, Mail, Lock, LogOut, ChevronRight, X, ShieldCheck, Store, Key } from 'lucide-react-native';
 
 import { useAuthStore } from '../../core/store/authStore';
-import RegisterBusinessModal from './RegisterBusinessModal';
 
 export default function ProfileScreen() {
+    const navigation = useNavigation();
     const { user, logout, updateProfile, updatePassword, isLoading } = useAuthStore();
 
-    // Modal States
-    const [showBusinessModal, setShowBusinessModal] = useState(false);
     const [editProfileOpen, setEditProfileOpen] = useState(false);
     const [changePasswordOpen, setChangePasswordOpen] = useState(false);
 
@@ -65,6 +64,32 @@ export default function ProfileScreen() {
         return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
     };
 
+    // 🚨 THE BOUNCER: If they aren't logged in, show this instead of the Profile!
+    if (!user) {
+        return (
+            <View style={[styles.container, { justifyContent: 'center', alignItems: 'center', padding: 20 }]}>
+                <View style={{ width: 80, height: 80, borderRadius: 40, backgroundColor: '#ffe4e6', justifyContent: 'center', alignItems: 'center', marginBottom: 20 }}>
+                    <Lock color="#f43f5e" size={40} />
+                </View>
+                <Text style={{ fontSize: 24, fontWeight: '700', color: '#0f172a', marginBottom: 10, textAlign: 'center' }}>
+                    Create your profile
+                </Text>
+                <Text style={{ fontSize: 16, color: '#64748b', textAlign: 'center', marginBottom: 30, paddingHorizontal: 20 }}>
+                    Log in or sign up to manage your appointments, register a business, and update your settings.
+                </Text>
+                
+                <TouchableOpacity 
+                    style={{ width: '100%', borderRadius: 16, overflow: 'hidden' }}
+                    onPress={() => navigation.navigate('Auth')}
+                >
+                    <LinearGradient colors={['#f43f5e', '#fb7185']} style={{ height: 56, justifyContent: 'center', alignItems: 'center' }}>
+                        <Text style={{ color: '#ffffff', fontSize: 16, fontWeight: '700' }}>Log In / Sign Up</Text>
+                    </LinearGradient>
+                </TouchableOpacity>
+            </View>
+        );
+    }
+
     return (
         <View style={styles.container}>
             <ScrollView showsVerticalScrollIndicator={false} bounces={false}>
@@ -97,7 +122,10 @@ export default function ProfileScreen() {
 
                 {user?.role !== 'manager' && (
                     <View style={styles.ctaWrapper}>
-                        <TouchableOpacity activeOpacity={0.9} onPress={() => setShowBusinessModal(true)}>
+                        <TouchableOpacity 
+                            activeOpacity={0.9} 
+                            onPress={() => navigation.navigate('RegisterBusiness')}
+                        >
                             <LinearGradient colors={['#8b5cf6', '#7c3aed']} style={styles.ctaCard}>
                                 <View style={styles.ctaIconContainer}>
                                     <Store color="#ffffff" size={28} />
@@ -145,9 +173,6 @@ export default function ProfileScreen() {
                 
                 <View style={{ height: 40 }} />
             </ScrollView>
-
-            <RegisterBusinessModal visible={showBusinessModal} onClose={() => setShowBusinessModal(false)} />
-
 
             <Modal animationType="slide" transparent={true} visible={editProfileOpen} onRequestClose={() => setEditProfileOpen(false)}>
                 <View style={styles.modalOverlay}>

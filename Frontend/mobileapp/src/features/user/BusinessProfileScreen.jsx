@@ -14,6 +14,8 @@ import { useRoute, useNavigation } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ArrowLeft, MapPin, Star, X, Phone, BadgeCheck } from 'lucide-react-native';
 
+// Stores
+import { useAuthStore } from '../../core/store/authStore'; // 🚨 Added Auth Store
 import { useBusinessStore } from '../../core/store/businessStore';
 import { useServiceStore } from '../../core/store/serviceStore';
 import { useAppointmentStore } from '../../core/store/appointmentStore';
@@ -36,6 +38,9 @@ const baseUpcomingDates = getNext7Days();
 export default function BusinessProfileScreen() {
     const route = useRoute();
     const navigation = useNavigation();
+    
+    // 🚨 NEW: Get the current user to act as the Bouncer
+    const user = useAuthStore(state => state.user);
 
     const { providerId } = route.params;
 
@@ -72,6 +77,13 @@ export default function BusinessProfileScreen() {
     const [selectedTime, setSelectedTime] = useState("");
 
     const handleBookClick = (service) => {
+        // 🚨 THE BOUNCER: Stop guests from booking!
+        if (!user) {
+            alert("Please log in to book an appointment.");
+            navigation.navigate('Auth');
+            return;
+        }
+
         setSelectedService(service);
         setBookingModalOpen(true);
     };
@@ -127,7 +139,6 @@ export default function BusinessProfileScreen() {
             return;
         }
 
-
         const d = new Date(selectedDate);
         const year = d.getFullYear();
         const month = String(d.getMonth() + 1).padStart(2, '0');
@@ -145,7 +156,6 @@ export default function BusinessProfileScreen() {
             alert(result.message || "Failed to book appointment.");
         }
     };
-
 
     const getImageUrl = (imagePath) => {
         if (!imagePath) return "https://images.unsplash.com/photo-1600948836101-f9ffda59d250?w=800&q=80";

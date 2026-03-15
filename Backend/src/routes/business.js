@@ -1,10 +1,12 @@
 import express from 'express'
-import { createBusiness , 
+import { 
+    createBusiness , 
     getBusinesses , 
     getBusiness , 
     updateBusiness ,
     deleteBusiness,
-    verifyBusiness
+    verifyBusiness,
+    getPendingBusinesses
 }
     from '../controllers/business.js'
 import { protect , authorize } from '../middlewares/authMiddleware.js';
@@ -13,6 +15,8 @@ import upload from '../middlewares/uploadMiddleware.js';
 const router = express.Router()
 
 router.get('/', getBusinesses)
+router.get('/admin/pending', protect, authorize('admin'), getPendingBusinesses);
+
 router.get('/:id', getBusiness)
 router.post('/', protect, upload.fields([
     {name : 'coverImage' , maxCount: 1,},

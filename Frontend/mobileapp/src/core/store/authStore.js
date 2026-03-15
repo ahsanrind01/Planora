@@ -55,4 +55,9 @@ export const useAuthStore = create((set) => ({
             return { success: false, message: error.response?.data?.message || "Failed to update password." };
         }
     },
+    promoteToManager: () => {
+        set((state) => ({
+            user: { ...state.user, role: 'manager' }
+        }));
+    },
 }));

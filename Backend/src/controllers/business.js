@@ -5,9 +5,9 @@ import path from 'path';
 export const createBusiness = async (req, res) => {
 
     try {
-        const { name, description, category, address, phone } = req.body;
+        const { name, description, category, address, phone, city } = req.body;
 
-        if (!name || !description || !category || !address || !phone) {
+        if (!name || !description || !category || !address || !phone || !city) {
             return res.status(400).json({ message: 'please fill the given fields' })
         }
 
@@ -32,6 +32,7 @@ export const createBusiness = async (req, res) => {
             name: name,
             description: description,
             category: category,
+            city: city,
             address: address,
             phone: phone,
             coverImage: coverImage,
@@ -61,6 +62,8 @@ export const getBusinesses = async (req, res) => {
 
     const excludedFields = ['page', 'sort', 'limit', 'fields', 'search'];
     excludedFields.forEach(el => delete queryObj[el]);
+
+    queryObj.isVerified = true;
 
     if (req.query.search) {
         const keyword = req.query.search;
@@ -105,6 +108,23 @@ export const getBusinesses = async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
+};
+
+//for admin approval 
+export const getPendingBusinesses = async (req, res) => {
+    try {
+        const businesses = await Business.find({ isVerified: false })
+            .populate('owner', 'name email')
+            .sort('-createdAt');
+
+        res.status(200).json({
+            success: true,
+            count: businesses.length,
+            data: businesses
+        });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
 };
 
 
