@@ -17,7 +17,9 @@ import { useAuthStore } from '../../core/store/authStore';
 import { useBusinessStore } from '../../core/store/businessStore';
 import ProviderCard from '../../components/ui/ProviderCard';
 
-const categories = ["All", "Hair", "Nails", "Spa", "Therapy", "Massage", "Fitness", "Wellness"];
+const categories = ["All", "Cleaning", "Beauty", "Repair", "Health", "Automative", "Education", "Other"];
+
+const SERVER_URL = "http://192.168.18.125:3000"; 
 
 export default function DiscoverScreen() {
     const navigation = useNavigation();
@@ -38,6 +40,17 @@ export default function DiscoverScreen() {
         return () => clearTimeout(delaySearch);
         
     }, [selectedCategory, searchQuery]); 
+
+    const getFullImageUrl = (imagePath) => {
+        if (!imagePath) {
+            return "https://images.unsplash.com/photo-1600948836101-f9ffda59d250?w=400&q=80";
+        }
+        if (imagePath.startsWith('http')) {
+            return imagePath;
+        }
+        const cleanPath = imagePath.replace(/\\/g, '/').replace(/^\//, ''); 
+        return `${SERVER_URL}/${cleanPath}`;
+    };
 
     return (
         <View style={styles.container}>
@@ -105,7 +118,8 @@ export default function DiscoverScreen() {
                                 name: business.name || "Unnamed Business",
                                 rating: business.rating || "New",
                                 distance: business.distance || "N/A",
-                                image: business.coverImage || business.image || "https://images.unsplash.com/photo-1600948836101-f9ffda59d250?w=400&q=80"
+                                // 🚨 APPLED THE FIX HERE!
+                                image: getFullImageUrl(business.coverImage || business.image)
                             }}
                             onPress={() => {
                                 const targetId = business._id || business.id;

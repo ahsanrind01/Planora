@@ -33,6 +33,8 @@ export const signup = async (req, res) => {
                 id: user._id,
                 name: user.name,
                 email: user.email,
+                role: user.role,             
+                businessId: user.businessId, 
                 token
             })
         } else {
@@ -62,9 +64,11 @@ export const login = async (req, res) => {
             );
 
             res.status(200).json({
-                id:user._id,
-                name:user.name,
-                email:user.email,
+                id: user._id,
+                name: user.name,
+                email: user.email,
+                role: user.role,             
+                businessId: user.businessId, 
                 token
             })
 
@@ -77,4 +81,3 @@ export const login = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
-

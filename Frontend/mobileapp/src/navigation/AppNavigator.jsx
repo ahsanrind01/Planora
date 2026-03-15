@@ -2,34 +2,33 @@ import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
-// We will build this new unified file in Step 2!
-import MainTabs from './MainTabs'; 
+import { useAuthStore } from '../core/store/authStore';
+
+import CustomerTabs from './CustomerTabs';
+import ManagerTabs from './ManagerTabs';
 import AuthStack from './AuthStack';
 import RegisterBusinessScreen from '../features/user/RegisterBusinessScreen';
 
 const Stack = createNativeStackNavigator();
 
 export default function AppNavigator() {
-  return (
-    <NavigationContainer>
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
-        {/* 1. EVERYONE gets in. This is the default view. */}
-        <Stack.Screen name="MainTabs" component={MainTabs} />
+    const user = useAuthStore((state) => state.user);
+    const isManager = user?.role === 'manager';
 
-        {/* 2. Authentication Modal (Slides up when a guest tries to book) */}
-        <Stack.Screen 
-          name="Auth" 
-          component={AuthStack} 
-          options={{ presentation: 'modal' }} 
-        />
+    return (
+        <NavigationContainer>
+            <Stack.Navigator screenOptions={{ headerShown: false }}>
+                
+                {isManager ? (
+                    <Stack.Screen name="ManagerApp" component={ManagerTabs} />
+                ) : (
+                    <Stack.Screen name="CustomerApp" component={CustomerTabs} />
+                )}
 
-        {/* 3. Manager Registration Modal */}
-        <Stack.Screen 
-          name="RegisterBusiness" 
-          component={RegisterBusinessScreen} 
-          options={{ presentation: 'modal' }} 
-        />
-      </Stack.Navigator>
-    </NavigationContainer>
-  );
+                <Stack.Screen name="Auth" component={AuthStack} options={{ presentation: 'modal' }} />
+                <Stack.Screen name="RegisterBusiness" component={RegisterBusinessScreen} options={{ presentation: 'modal' }} />
+                
+            </Stack.Navigator>
+        </NavigationContainer>
+    );
 }

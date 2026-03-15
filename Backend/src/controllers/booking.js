@@ -121,6 +121,7 @@ export const getBookings = async (req, res) => {
     }
 };
 
+
 export const getBusinessBookings = async (req, res) => {
     try {
         const business = await Business.findOne({ owner: req.user._id });
@@ -130,7 +131,7 @@ export const getBusinessBookings = async (req, res) => {
 
         const bookings = await Booking.find({ businessId: business._id })
             .populate('userId', 'name email')
-            .populate('serviceId', 'name duration');
+            .populate('serviceId', 'name duration price'); 
 
         res.status(200).json({
             success: true,
@@ -142,3 +143,28 @@ export const getBusinessBookings = async (req, res) => {
     }
 };
 
+export const updateBookingStatus = async (req, res) => {
+    try {
+        const { status } = req.body;
+        const booking = await Booking.findById(req.params.id);
+
+        if (!booking) {
+            return res.status(404).json({ message: 'Booking not found' });
+        }
+
+        const business = await Business.findOne({ owner: req.user._id });
+        if (booking.businessId.toString() !== business._id.toString()) {
+            return res.status(403).json({ message: 'Not authorized' });
+        }
+
+        booking.status = status;
+        await booking.save();
+
+        res.status(200).json({
+            success: true,
+            data: booking
+        });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};

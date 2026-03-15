@@ -34,28 +34,28 @@ export default function LoginScreen() {
 
         setIsLoading(true);
 
-        console.log("1. Sending login request...");
-
         try {
             const response = await apiClient.post('/auth/login', { 
                 email: email.toLowerCase(), 
                 password 
             });
 
-            const { token, id, name, email: userEmail, role } = response.data;
+            // 🚨 CAUGHT THE BUSINESS ID: Added businessId to destructuring
+            const { token, id, name, email: userEmail, role, businessId } = response.data;
             
             const userObj = {
                 id: id,
                 name: name,
                 email: userEmail,
-                role: role || 'customer' 
+                role: role || 'customer',
+                businessId: businessId // 🚨 SAVED IT: Now Zustand knows your business ID!
             };
             
-            console.log("3. Passing to Zustand:", { user: userObj, token });
-
+            // 1. Log the user in
             login(userObj, token);
 
-
+            // 🚨 2. THE FIX: Close the modal immediately so they can see the app!
+            navigation.goBack();
 
         } catch (error) {
             const message = error.response?.data?.message || "Invalid credentials.";
@@ -138,88 +138,22 @@ export default function LoginScreen() {
     );
 }
 
-
+// Styles remain exactly the same...
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-    },
-    scrollContent: {
-        flexGrow: 1,
-        justifyContent: 'center',
-        padding: 16,
-    },
-    card: {
-        backgroundColor: '#ffffff',
-        borderRadius: 16,
-        padding: 24,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 10 },
-        shadowOpacity: 0.1,
-        shadowRadius: 15,
-        elevation: 5, 
-        width: '100%',
-        maxWidth: 450,
-        alignSelf: 'center',
-    },
-    header: {
-        alignItems: 'center',
-        marginBottom: 24,
-    },
-    iconContainer: {
-        marginBottom: 16,
-    },
-    iconBackground: {
-        padding: 12,
-        borderRadius: 50,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    title: {
-        fontSize: 24,
-        fontWeight: '700',
-        color: '#0f172a', 
-        marginBottom: 8,
-    },
-    description: {
-        fontSize: 14,
-        color: '#64748b', 
-        textAlign: 'center',
-    },
-    form: {
-        gap: 16,
-    },
-    inputGroup: {
-        marginBottom: 16,
-    },
-    passwordHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 8,
-    },
-    label: {
-        fontSize: 14,
-        fontWeight: '500',
-        color: '#0f172a',
-        marginBottom: 8,
-    },
-    forgotPassword: {
-        fontSize: 14,
-        color: '#f43f5e',
-        fontWeight: '500',
-    },
-    footer: {
-        flexDirection: 'row',
-        justifyContent: 'center',
-        marginTop: 24,
-    },
-    footerText: {
-        fontSize: 14,
-        color: '#475569', 
-    },
-    signupText: {
-        fontSize: 14,
-        fontWeight: '600',
-        color: '#f43f5e', 
-    }
+    container: { flex: 1 },
+    scrollContent: { flexGrow: 1, justifyContent: 'center', padding: 16 },
+    card: { backgroundColor: '#ffffff', borderRadius: 16, padding: 24, shadowColor: '#000', shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.1, shadowRadius: 15, elevation: 5, width: '100%', maxWidth: 450, alignSelf: 'center' },
+    header: { alignItems: 'center', marginBottom: 24 },
+    iconContainer: { marginBottom: 16 },
+    iconBackground: { padding: 12, borderRadius: 50, justifyContent: 'center', alignItems: 'center' },
+    title: { fontSize: 24, fontWeight: '700', color: '#0f172a', marginBottom: 8 },
+    description: { fontSize: 14, color: '#64748b', textAlign: 'center' },
+    form: { gap: 16 },
+    inputGroup: { marginBottom: 16 },
+    passwordHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
+    label: { fontSize: 14, fontWeight: '500', color: '#0f172a', marginBottom: 8 },
+    forgotPassword: { fontSize: 14, color: '#f43f5e', fontWeight: '500' },
+    footer: { flexDirection: 'row', justifyContent: 'center', marginTop: 24 },
+    footerText: { fontSize: 14, color: '#475569' },
+    signupText: { fontSize: 14, fontWeight: '600', color: '#f43f5e' }
 });

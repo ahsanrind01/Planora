@@ -3,7 +3,8 @@ import {
     createBooking, 
     getBookings, 
     getBusinessBookings ,
-    cancelBooking
+    cancelBooking,
+    updateBookingStatus
 } from '../controllers/booking.js';
 import { protect } from '../middlewares/authMiddleware.js';
 
@@ -13,5 +14,6 @@ router.post('/create',protect,createBooking);
 router.put('/:id/cancel', protect, cancelBooking);
 router.get('/me',protect,getBookings);
 router.get('/business',protect,getBusinessBookings)
+router.patch('/:id/status', protect, updateBookingStatus);
 
 export default router;
