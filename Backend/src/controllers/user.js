@@ -107,4 +107,22 @@ export const updatePassword = async (req, res) => {
     }
 };
 
+export const savePushToken = async (req, res) => {
+    try {
+        const { pushToken } = req.body;
+
+        const userId = req.user.id; 
+
+        if (!pushToken) {
+            return res.status(400).json({ message: "Push token is required" });
+        }
+
+        await User.findByIdAndUpdate(userId, { pushToken }, { new: true });
+
+        res.status(200).json({ success: true, message: "Push token safely stored!" });
+    } catch (error) {
+        console.error("🚨 Error saving push token:", error);
+        res.status(500).json({ message: "Server error", error: error.message });
+    }
+};
 

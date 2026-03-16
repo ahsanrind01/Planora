@@ -1,6 +1,7 @@
 import eventBus from '../utils/eventBus.js';
 
 import Booking from '../models/booking.js';
+import User from '../models/user.js';
 import Service from '../models/service.js';
 import Business from '../models/business.js';
 import Schedule from '../models/schedule.js';
@@ -13,7 +14,6 @@ export const createBooking = async (req, res) => {
         if (!service) {
             return res.status(404).json({ message: 'Service not found' });
         }
-
 
         const dateOnly = date.split('T')[0]; 
         const timeOnly = date.split('T')[1].substring(0, 5); 
@@ -32,7 +32,6 @@ export const createBooking = async (req, res) => {
         if (!daySchedule || daySchedule.isClosed) {
             return res.status(400).json({ message: `Sorry, this business is closed on ${requestedDay}s.` });
         }
-
 
         const reqStartMins = parseInt(timeOnly.split(':')[0]) * 60 + parseInt(timeOnly.split(':')[1]);
         const duration = Number(service.duration) || 30; 
@@ -68,13 +67,25 @@ export const createBooking = async (req, res) => {
             endTime: endTime,
             status: 'pending',
         });
- 
+
+        const user = await User.findById(req.user._id);
+        const business = await Business.findById(service.businessId);
+
+        const notificationPayload = {
+            _id: booking._id,
+            userEmail: user.email,
+            userName: user.name,
+            businessName: business.name,
+            date: booking.date,
+            pushToken: user.pushToken 
+        };
+
         res.status(201).json({
             success: true,
             data: booking
         });
 
-        eventBus.emit('bookingCreated', booking);
+        eventBus.emit('bookingCreated', notificationPayload);
 
     } catch (error) {
         res.status(500).json({ message: error.message });
