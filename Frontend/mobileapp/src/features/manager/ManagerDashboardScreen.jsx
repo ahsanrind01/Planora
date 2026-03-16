@@ -8,7 +8,8 @@ import {
     SafeAreaView,
     ActivityIndicator,
     RefreshControl,
-    Alert
+    Alert,
+    Platform
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -107,14 +108,16 @@ export default function ManagerDashboardScreen() {
         <View style={styles.container}>
             <ScrollView
                 showsVerticalScrollIndicator={false}
-                refreshControl={<RefreshControl refreshing={isLoading} onRefresh={fetchDashboardData} tintColor="#f43f5e" />}
+                refreshControl={<RefreshControl refreshing={isLoading} onRefresh={fetchDashboardData} tintColor="#2563eb" />}
             >
-                <LinearGradient colors={['#f43f5e', '#ec4899']} style={styles.header}>
+                <LinearGradient colors={['#0f172a', '#1e3a8a']} style={styles.header}>
                     <SafeAreaView>
                         <View style={styles.headerContent}>
                             <View style={[styles.circle, styles.circleTopRight]} />
+                            <View style={[styles.circle, styles.circleBottomLeft]} />
+
                             <Text style={styles.greeting}>Welcome back,</Text>
-                            <Text style={styles.managerName}>{user?.name || 'Manager'} 👋</Text>
+                            <Text style={styles.managerName}>{user?.name || 'Manager'} </Text>
                         </View>
                     </SafeAreaView>
                 </LinearGradient>
@@ -124,19 +127,20 @@ export default function ManagerDashboardScreen() {
                     <View style={styles.statsGrid}>
 
                         <TouchableOpacity
+                            activeOpacity={0.8}
                             style={[styles.statCard, activeFilter === 'confirmed' && styles.activeCard]}
                             onPress={() => setActiveFilter('confirmed')}
                         >
-                            <View style={[styles.iconBox, { backgroundColor: '#dbeafe' }]}>
-                                <CalendarCheck color="#3b82f6" size={24} />
+                            <View style={[styles.iconBox, { backgroundColor: '#eff6ff' }]}>
+                                <CalendarCheck color="#2563eb" size={24} />
                             </View>
                             <Text style={styles.statValue}>{stats.totalBookings}</Text>
                             <Text style={styles.statLabel}>Total Bookings</Text>
                         </TouchableOpacity>
 
                         <View style={styles.statCard}>
-                            <View style={[styles.iconBox, { backgroundColor: '#fce7f3' }]}>
-                                <Users color="#db2777" size={24} />
+                            <View style={[styles.iconBox, { backgroundColor: '#e0e7ff' }]}>
+                                <Users color="#4f46e5" size={24} />
                             </View>
                             <Text style={styles.statValue}>{stats.totalCustomers}</Text>
                             <Text style={styles.statLabel}>Total Clients</Text>
@@ -151,6 +155,7 @@ export default function ManagerDashboardScreen() {
                         </View>
 
                         <TouchableOpacity
+                            activeOpacity={0.8}
                             style={[styles.statCard, activeFilter === 'pending' && styles.activeCard]}
                             onPress={() => setActiveFilter('pending')}
                         >
@@ -172,9 +177,9 @@ export default function ManagerDashboardScreen() {
                     </View>
 
                     {isLoading ? (
-                        <ActivityIndicator size="large" color="#f43f5e" style={{ marginTop: 20 }} />
+                        <ActivityIndicator size="large" color="#2563eb" style={{ marginTop: 20 }} />
                     ) : displayedAppointments.length === 0 ? (
-                        <Text style={{ color: '#64748b', textAlign: 'center', marginTop: 20 }}>
+                        <Text style={styles.emptyText}>
                             {activeFilter === 'pending' ? 'No pending requests.' : 'No confirmed appointments yet.'}
                         </Text>
                     ) : (
@@ -184,7 +189,7 @@ export default function ManagerDashboardScreen() {
                                     <Text style={styles.aptTime}>
                                         {new Date(apt.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                     </Text>
-                                    <Text style={{ fontSize: 11, fontWeight: '500', color: '#64748b', marginTop: 4 }}>
+                                    <Text style={styles.aptDate}>
                                         {new Date(apt.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
                                     </Text>
                                 </View>
@@ -197,16 +202,18 @@ export default function ManagerDashboardScreen() {
                                 {apt.status === 'pending' ? (
                                     <View style={styles.actionButtons}>
                                         <TouchableOpacity
-                                            style={[styles.actionBtn, { backgroundColor: '#ecfdf5', borderColor: '#10b981' }]}
+                                            activeOpacity={0.7}
+                                            style={[styles.actionBtn, { backgroundColor: '#dcfce7', borderColor: '#bbf7d0' }]}
                                             onPress={() => handleUpdateStatus(apt._id, 'confirmed')}
                                         >
-                                            <Check color="#10b981" size={18} />
+                                            <Check color="#16a34a" size={20} strokeWidth={2.5} />
                                         </TouchableOpacity>
                                         <TouchableOpacity
-                                            style={[styles.actionBtn, { backgroundColor: '#fef2f2', borderColor: '#ef4444' }]}
+                                            activeOpacity={0.7}
+                                            style={[styles.actionBtn, { backgroundColor: '#fef2f2', borderColor: '#fecaca' }]}
                                             onPress={() => handleUpdateStatus(apt._id, 'cancelled')}
                                         >
-                                            <X color="#ef4444" size={18} />
+                                            <X color="#dc2626" size={20} strokeWidth={2.5} />
                                         </TouchableOpacity>
                                     </View>
                                 ) : (
@@ -220,39 +227,217 @@ export default function ManagerDashboardScreen() {
                     )}
                 </View>
 
-                <View style={{ height: 40 }} />
+                <View style={{ height: 60 }} />
             </ScrollView>
         </View>
     );
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#fafaf9' },
-    header: { paddingBottom: 30, borderBottomLeftRadius: 30, borderBottomRightRadius: 30, overflow: 'hidden' },
-    headerContent: { paddingHorizontal: 20, paddingTop: 20 },
-    circle: { position: 'absolute', backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: 100 },
-    circleTopRight: { width: 150, height: 150, top: -50, right: -50 },
-    greeting: { fontSize: 16, color: 'rgba(255,255,255,0.9)', marginBottom: 4 },
-    managerName: { fontSize: 28, fontWeight: '700', color: '#ffffff', marginBottom: 12 },
-    badge: { alignSelf: 'flex-start', backgroundColor: 'rgba(0,0,0,0.2)', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20 },
-    badgeText: { color: '#ffffff', fontSize: 12, fontWeight: '600', letterSpacing: 0.5 },
-    statsContainer: { paddingHorizontal: 20, marginTop: 24 },
-    sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
-    sectionTitle: { fontSize: 18, fontWeight: '700', color: '#0f172a', marginBottom: 16 },
-    statsGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', gap: 12 },
-    statCard: { width: '48%', backgroundColor: '#ffffff', padding: 16, borderRadius: 20, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.05, shadowRadius: 10, elevation: 3, borderWidth: 2, borderColor: '#ffffff', marginBottom: 4 },
-    activeCard: { borderColor: '#f43f5e', shadowColor: '#f43f5e', shadowOpacity: 0.15 },
-    iconBox: { width: 48, height: 48, borderRadius: 16, justifyContent: 'center', alignItems: 'center', marginBottom: 12 },
-    statValue: { fontSize: 22, fontWeight: '700', color: '#0f172a', marginBottom: 4 },
-    statLabel: { fontSize: 13, color: '#64748b', fontWeight: '500' },
-    scheduleContainer: { paddingHorizontal: 20, marginTop: 32 },
-    appointmentCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#ffffff', padding: 16, borderRadius: 16, marginBottom: 12, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 8, elevation: 2, borderWidth: 1, borderColor: '#f1f5f9' },
-    aptTimeBox: { width: 80, borderRightWidth: 1, borderRightColor: '#f1f5f9', marginRight: 16 },
-    aptTime: { fontSize: 14, fontWeight: '700', color: '#0f172a' },
-    aptDetails: { flex: 1 },
-    customerName: { fontSize: 16, fontWeight: '600', color: '#0f172a', marginBottom: 4 },
-    serviceName: { fontSize: 13, color: '#64748b', textTransform: 'capitalize' },
-    statusDot: { width: 10, height: 10, borderRadius: 5, marginLeft: 10 },
-    actionButtons: { flexDirection: 'row', gap: 8 },
-    actionBtn: { width: 36, height: 36, borderRadius: 18, borderWidth: 1, justifyContent: 'center', alignItems: 'center' }
+    container: { 
+        flex: 1, 
+        backgroundColor: '#f8fafc' 
+    },
+    
+    header:{
+        paddingBottom: 36,
+        borderBottomLeftRadius: 38,
+        borderBottomRightRadius: 38,
+        overflow: 'hidden',
+        
+        shadowColor: '#020617',
+        shadowOffset: { width: 0, height: 12 },
+        shadowOpacity: 0.25,
+        shadowRadius: 24,
+        elevation: 15
+    },
+    headerContent:{
+        paddingHorizontal: 24,
+        paddingTop: Platform.OS === 'android' ? 40 : 26
+    },
+    circle:{
+        position: 'absolute',
+        backgroundColor: 'rgba(255,255,255,0.07)',
+        borderRadius: 100
+    },
+    circleTopRight:{
+        width: 200,
+        height: 200,
+        top: -80,
+        right: -70
+    },
+    circleBottomLeft:{
+        width: 150,
+        height: 150,
+        bottom: -60,
+        left: -60
+    },
+
+    greeting: { 
+        fontSize: 16, 
+        color: '#cbd5e1', 
+        marginBottom: 4,
+        fontWeight: '500' 
+    },
+    managerName: { 
+        fontSize: 30, 
+        fontWeight: '700', 
+        color: '#ffffff', 
+        marginBottom: 12,
+        letterSpacing: -0.5 
+    },
+
+    statsContainer: { 
+        paddingHorizontal: 24, 
+        marginTop: 24 
+    },
+    sectionHeader: { 
+        flexDirection: 'row', 
+        justifyContent: 'space-between', 
+        alignItems: 'center', 
+        marginBottom: 16 
+    },
+    sectionTitle: { 
+        fontSize: 21, 
+        fontWeight: '800', 
+        color: '#020617', 
+        marginBottom: 16,
+        letterSpacing: -0.3 
+    },
+    statsGrid: { 
+        flexDirection: 'row', 
+        flexWrap: 'wrap', 
+        justifyContent: 'space-between', 
+        gap: 12 
+    },
+    statCard: { 
+        width: '48%', 
+        backgroundColor: '#ffffff', 
+        padding: 16, 
+        borderRadius: 24, 
+        shadowColor: '#0f172a', 
+        shadowOffset: { width: 0, height: 8 }, 
+        shadowOpacity: 0.05, 
+        shadowRadius: 16, 
+        elevation: 3, 
+        borderWidth: 2, 
+        borderColor: '#ffffff', 
+        marginBottom: 4 
+    },
+    activeCard: { 
+        borderColor: '#1e40af', 
+        shadowColor: '#1d4ed8', 
+        shadowOpacity: 0.2,
+        shadowRadius: 12
+    },
+    iconBox: { 
+        width: 48, 
+        height: 48, 
+        borderRadius: 16, 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        marginBottom: 12 
+    },
+    statValue: { 
+        fontSize: 24, 
+        fontWeight: '800', 
+        color: '#0f172a', 
+        marginBottom: 4,
+        letterSpacing: -0.5
+    },
+    statLabel: { 
+        fontSize: 14, 
+        color: '#64748b', 
+        fontWeight: '600' 
+    },
+
+   
+    scheduleContainer: { 
+        paddingHorizontal: 24, 
+        marginTop: 32 
+    },
+    emptyText: { 
+        color: '#64748b', 
+        textAlign: 'center', 
+        marginTop: 20,
+        fontSize: 15,
+        fontWeight: '500' 
+    },
+    appointmentCard: { 
+        flexDirection: 'row', 
+        alignItems: 'center', 
+        backgroundColor: '#ffffff', 
+        padding: 20, 
+        borderRadius: 20, 
+        marginBottom: 16, 
+        shadowColor: '#0f172a', 
+        shadowOffset: { width: 0, height: 6 }, 
+        shadowOpacity: 0.05, 
+        shadowRadius: 12, 
+        elevation: 2, 
+        borderWidth: 1, 
+        borderColor: '#f1f5f9' 
+    },
+    aptTimeBox: { 
+        width: 80, 
+        borderRightWidth: 1, 
+        borderRightColor: '#e2e8f0', 
+        marginRight: 16,
+        paddingRight: 12
+    },
+    aptTime: { 
+        fontSize: 15, 
+        fontWeight: '800', 
+        color: '#0f172a' 
+    },
+    aptDate: { 
+        fontSize: 12, 
+        fontWeight: '600', 
+        color: '#64748b', 
+        marginTop: 4 
+    },
+    aptDetails: { 
+        flex: 1 
+    },
+    customerName: { 
+        fontSize: 17, 
+        fontWeight: '700', 
+        color: '#0f172a', 
+        marginBottom: 4,
+        letterSpacing: -0.2
+    },
+    serviceName: { 
+        fontSize: 14, 
+        color: '#64748b', 
+        fontWeight: '500',
+        textTransform: 'capitalize' 
+    },
+    
+    statusDot: { 
+        width: 12, 
+        height: 12, 
+        borderRadius: 6, 
+        marginLeft: 10,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 2
+    },
+    actionButtons: { 
+        flexDirection: 'row', 
+        gap: 10 
+    },
+    actionBtn: { 
+        width: 44, 
+        height: 44, 
+        borderRadius: 22, 
+        borderWidth: 1.5, 
+        justifyContent: 'center', 
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.05,
+        shadowRadius: 4,
+        elevation: 2
+    }
 });

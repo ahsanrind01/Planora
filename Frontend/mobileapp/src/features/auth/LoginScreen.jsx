@@ -70,25 +70,32 @@ export default function LoginScreen() {
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
             style={{ flex: 1 }}
         >
+            {/* 🎨 UI UPGRADE: Deep Navy to Royal Blue Gradient Background */}
             <LinearGradient
-                colors={['#fffbeb', '#fff1f2', '#f3e8ff']}
+                colors={['#0f172a', '#1e3a8a']}
                 style={styles.container}
             >
-                <ScrollView contentContainerStyle={styles.scrollContent}>
+                {/* 🎨 UI UPGRADE: Ambient glass circles for background depth */}
+                <View style={[styles.circle, styles.circleTopRight]} />
+                <View style={[styles.circle, styles.circleBottomLeft]} />
 
+                <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+
+                    {/* 🎨 UI UPGRADE: Pristine white floating card */}
                     <View style={styles.card}>
 
                         <View style={styles.header}>
                             <View style={styles.iconContainer}>
+                                {/* 🎨 UI UPGRADE: Royal blue icon gradient */}
                                 <LinearGradient
-                                    colors={['#fb7185', '#a855f7']}
+                                    colors={['#1e40af', '#3b82f6']}
                                     style={styles.iconBackground}
                                 >
-                                    <Calendar size={32} color="#ffffff" />
+                                    <Calendar size={28} color="#ffffff" strokeWidth={2.5} />
                                 </LinearGradient>
                             </View>
                             <Text style={styles.title}>Welcome Back</Text>
-                            <Text style={styles.description}>Sign in to your booking services account</Text>
+                            <Text style={styles.description}>Sign in to your booking account</Text>
                         </View>
 
                         <View style={styles.form}>
@@ -110,7 +117,10 @@ export default function LoginScreen() {
                                     value={password}
                                     onChangeText={setPassword}
                                     rightElement={
-                                        <TouchableOpacity onPress={() => Alert.alert("Notice", "Password reset coming soon!")}>
+                                        <TouchableOpacity 
+                                            activeOpacity={0.7}
+                                            onPress={() => Alert.alert("Notice", "Password reset coming soon!")}
+                                        >
                                             <Text style={styles.forgotPassword}>Forgot password?</Text>
                                         </TouchableOpacity>
                                     }
@@ -125,7 +135,10 @@ export default function LoginScreen() {
 
                             <View style={styles.footer}>
                                 <Text style={styles.footerText}>Don't have an account? </Text>
-                                <TouchableOpacity onPress={() => navigation.navigate('Register')}>
+                                <TouchableOpacity 
+                                    activeOpacity={0.7}
+                                    onPress={() => navigation.navigate('Register')}
+                                >
                                     <Text style={styles.signupText}>Sign up</Text>
                                 </TouchableOpacity>
                             </View>
@@ -138,22 +151,131 @@ export default function LoginScreen() {
     );
 }
 
-// Styles remain exactly the same...
 const styles = StyleSheet.create({
-    container: { flex: 1 },
-    scrollContent: { flexGrow: 1, justifyContent: 'center', padding: 16 },
-    card: { backgroundColor: '#ffffff', borderRadius: 16, padding: 24, shadowColor: '#000', shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.1, shadowRadius: 15, elevation: 5, width: '100%', maxWidth: 450, alignSelf: 'center' },
-    header: { alignItems: 'center', marginBottom: 24 },
-    iconContainer: { marginBottom: 16 },
-    iconBackground: { padding: 12, borderRadius: 50, justifyContent: 'center', alignItems: 'center' },
-    title: { fontSize: 24, fontWeight: '700', color: '#0f172a', marginBottom: 8 },
-    description: { fontSize: 14, color: '#64748b', textAlign: 'center' },
-    form: { gap: 16 },
-    inputGroup: { marginBottom: 16 },
-    passwordHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
-    label: { fontSize: 14, fontWeight: '500', color: '#0f172a', marginBottom: 8 },
-    forgotPassword: { fontSize: 14, color: '#f43f5e', fontWeight: '500' },
-    footer: { flexDirection: 'row', justifyContent: 'center', marginTop: 24 },
-    footerText: { fontSize: 14, color: '#475569' },
-    signupText: { fontSize: 14, fontWeight: '600', color: '#f43f5e' }
+    container: { 
+        flex: 1 
+    },
+
+    // 🎨 AMBIENT BACKGROUND ELEMENTS
+    circle: { 
+        position: 'absolute', 
+        backgroundColor: 'rgba(255,255,255,0.04)', 
+        borderRadius: 999 
+    },
+    circleTopRight: { 
+        width: 300, 
+        height: 300, 
+        top: -100, 
+        right: -100 
+    },
+    circleBottomLeft: { 
+        width: 200, 
+        height: 200, 
+        bottom: -50, 
+        left: -80 
+    },
+
+    scrollContent: { 
+        flexGrow: 1, 
+        justifyContent: 'center', 
+        padding: 24 // 🎨 Strict 8px grid
+    },
+
+    // 🎨 FLOATING CARD
+    card: { 
+        backgroundColor: '#ffffff', 
+        borderRadius: 32, // 🎨 Squircle shape
+        padding: 32, 
+        width: '100%', 
+        maxWidth: 450, 
+        alignSelf: 'center',
+        
+        // Premium layered shadows
+        shadowColor: '#000', 
+        shadowOffset: { width: 0, height: 16 }, 
+        shadowOpacity: 0.15, 
+        shadowRadius: 32, 
+        elevation: 10,
+        
+        // Subtle inner border for crispness
+        borderWidth: 1,
+        borderColor: 'rgba(255,255,255,0.8)'
+    },
+
+    header: { 
+        alignItems: 'center', 
+        marginBottom: 32 
+    },
+
+    iconContainer: { 
+        marginBottom: 20,
+        // Glowing drop shadow for the icon
+        shadowColor: '#1d4ed8',
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.25,
+        shadowRadius: 16,
+        elevation: 8
+    },
+
+    iconBackground: { 
+        padding: 16, 
+        borderRadius: 24, // Matches the squircle vibe
+        justifyContent: 'center', 
+        alignItems: 'center' 
+    },
+
+    title: { 
+        fontSize: 28, 
+        fontWeight: '800', 
+        color: '#0f172a', 
+        marginBottom: 8,
+        letterSpacing: -0.5 // Premium tracking
+    },
+
+    description: { 
+        fontSize: 15, 
+        color: '#64748b', 
+        textAlign: 'center',
+        fontWeight: '500'
+    },
+
+    form: { 
+        gap: 20 // Consistent spacing
+    },
+
+    inputGroup: { 
+        gap: 16, // Adds space between the two inputs
+        marginBottom: 8 
+    },
+
+    label: { 
+        fontSize: 14, 
+        fontWeight: '600', 
+        color: '#0f172a', 
+        marginBottom: 8 
+    },
+
+    forgotPassword: { 
+        fontSize: 14, 
+        color: '#2563eb', // 🎨 Changed to Royal Blue
+        fontWeight: '700' 
+    },
+
+    footer: { 
+        flexDirection: 'row', 
+        justifyContent: 'center', 
+        marginTop: 28 
+    },
+
+    footerText: { 
+        fontSize: 15, 
+        color: '#64748b',
+        fontWeight: '500'
+    },
+
+    signupText: { 
+        fontSize: 15, 
+        fontWeight: '700', 
+        color: '#2563eb' // 🎨 Changed to Royal Blue
+    }
 });

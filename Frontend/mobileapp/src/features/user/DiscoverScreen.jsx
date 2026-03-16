@@ -54,17 +54,17 @@ export default function DiscoverScreen() {
 
     return (
         <View style={styles.container}>
-            <LinearGradient colors={['#f43f5e', '#ec4899']} style={styles.header}>
+            <LinearGradient colors={['#1e3a8a', '#0f172a']} style={styles.header}>
                 <SafeAreaView>
                     <View style={styles.headerContent}>
                         <View style={[styles.circle, styles.circleTopRight]} />
                         <View style={[styles.circle, styles.circleBottomLeft]} />
 
-                        <Text style={styles.greeting}>Hello, {firstName}! 👋</Text>
+                        <Text style={styles.greeting}>Hello, {firstName}! </Text>
                         <Text style={styles.subtitle}>Discover amazing services near you</Text>
 
                         <View style={styles.searchContainer}>
-                            <Search color="#f43f5e" size={20} style={styles.searchIcon} />
+                            <Search color="#2563eb" size={20} style={styles.searchIcon} />
                             <TextInput
                                 style={styles.searchInput}
                                 placeholder="Search for services, businesses, or cities..."
@@ -83,9 +83,14 @@ export default function DiscoverScreen() {
                     {categories.map((category) => {
                         const isActive = selectedCategory === category;
                         return (
-                            <TouchableOpacity key={category} onPress={() => setSelectedCategory(category)}>
-                                <LinearGradient colors={isActive ? ['#f43f5e', '#fb7185'] : ['#ffffff', '#ffffff']} style={[styles.categoryPill, !isActive && styles.categoryPillInactive]}>
-                                    <Text style={[styles.categoryText, isActive && styles.categoryTextActive]}>{category}</Text>
+                            <TouchableOpacity key={category} activeOpacity={0.8} onPress={() => setSelectedCategory(category)}>
+                                <LinearGradient 
+                                    colors={isActive ? ['#2563eb', '#1e40af'] : ['#ffffff', '#ffffff']} 
+                                    style={[styles.categoryPill, !isActive && styles.categoryPillInactive]}
+                                >
+                                    <Text style={[styles.categoryText, isActive && styles.categoryTextActive]}>
+                                        {category}
+                                    </Text>
                                 </LinearGradient>
                             </TouchableOpacity>
                         );
@@ -104,7 +109,7 @@ export default function DiscoverScreen() {
                 </View>
 
                 {isLoading ? (
-                    <ActivityIndicator size="large" color="#f43f5e" style={styles.loader} />
+                    <ActivityIndicator size="large" color="#2563eb" style={styles.loader} />
                 ) : error ? (
                     <Text style={styles.errorText}>{error}</Text>
                 ) : businesses?.length === 0 ? (
@@ -118,7 +123,6 @@ export default function DiscoverScreen() {
                                 name: business.name || "Unnamed Business",
                                 rating: business.rating || "New",
                                 distance: business.distance || "N/A",
-                                // 🚨 APPLED THE FIX HERE!
                                 image: getFullImageUrl(business.coverImage || business.image)
                             }}
                             onPress={() => {
@@ -128,36 +132,188 @@ export default function DiscoverScreen() {
                         />
                     ))
                 )}
-                <View style={{ height: 40 }} />
+
+                <View style={{ height: 60 }} />
             </ScrollView>
         </View>
     );
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#fafaf9' },
-    header: { paddingBottom: 24, borderBottomLeftRadius: 30, borderBottomRightRadius: 30, overflow: 'hidden' },
-    headerContent: { paddingHorizontal: 20, paddingTop: 20 },
-    circle: { position: 'absolute', backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: 100 },
-    circleTopRight: { width: 160, height: 160, top: -60, right: -60 },
-    circleBottomLeft: { width: 120, height: 120, bottom: -40, left: -40 },
-    greeting: { fontSize: 28, fontWeight: '700', color: '#ffffff', marginBottom: 4 },
-    subtitle: { fontSize: 15, color: 'rgba(255,255,255,0.9)', marginBottom: 20 },
-    searchContainer: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#ffffff', borderRadius: 16, paddingHorizontal: 16, height: 56, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.1, shadowRadius: 12, elevation: 5 },
-    searchIcon: { marginRight: 12 },
-    searchInput: { flex: 1, fontSize: 16, color: '#0f172a' },
-    categoriesWrapper: { marginTop: 16, marginBottom: 8 },
-    categoriesContainer: { paddingHorizontal: 20, gap: 12 },
-    categoryPill: { paddingHorizontal: 20, paddingVertical: 10, borderRadius: 24, shadowColor: '#f43f5e', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 4 },
-    categoryPillInactive: { shadowColor: '#000', shadowOpacity: 0.05, elevation: 2 },
-    categoryText: { fontSize: 15, fontWeight: '600', color: '#64748b' },
-    categoryTextActive: { color: '#ffffff' },
-    feedContainer: { flex: 1, paddingHorizontal: 20 },
-    feedHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginVertical: 16 },
-    feedTitle: { fontSize: 18, fontWeight: '700', color: '#0f172a' },
-    badge: { backgroundColor: '#ffe4e6', paddingHorizontal: 12, paddingVertical: 4, borderRadius: 12 },
-    badgeText: { color: '#be123c', fontSize: 12, fontWeight: '700' },
-    loader: { marginTop: 40 },
-    errorText: { color: '#e11d48', textAlign: 'center', marginTop: 40, fontSize: 16 },
-    emptyText: { color: '#64748b', textAlign: 'center', marginTop: 40, fontSize: 16 }
+
+container:{
+flex:1,
+backgroundColor:'#f1f5f9'
+},
+
+header:{
+paddingBottom:36,
+borderBottomLeftRadius:38,
+borderBottomRightRadius:38,
+overflow:'hidden',
+
+shadowColor:'#020617',
+shadowOffset:{width:0,height:12},
+shadowOpacity:0.25,
+shadowRadius:24,
+elevation:15
+},
+
+headerContent:{
+paddingHorizontal:24,
+paddingTop:26
+},
+
+circle:{
+position:'absolute',
+backgroundColor:'rgba(255,255,255,0.07)',
+borderRadius:100
+},
+
+circleTopRight:{
+width:200,
+height:200,
+top:-80,
+right:-70
+},
+
+circleBottomLeft:{
+width:150,
+height:150,
+bottom:-60,
+left:-60
+},
+
+greeting:{
+fontSize:30,
+fontWeight:'700',
+color:'#ffffff',
+marginBottom:6,
+letterSpacing:0
+},
+
+subtitle:{
+fontSize:15,
+color:'rgba(255,255,255,0.9)',
+marginBottom:24
+},
+
+searchContainer:{
+flexDirection:'row',
+alignItems:'center',
+backgroundColor:'#ffffff',
+borderRadius:20,
+paddingHorizontal:18,
+height:60,
+
+shadowColor:'#0f172a',
+shadowOffset:{width:0,height:10},
+shadowOpacity:0.18,
+shadowRadius:20,
+elevation:10
+},
+
+searchIcon:{
+marginRight:12
+},
+
+searchInput:{
+flex:1,
+fontSize:16,
+color:'#0f172a'
+},
+
+categoriesWrapper:{
+marginTop:24,
+marginBottom:6
+},
+
+categoriesContainer:{
+paddingHorizontal:20,
+gap:14
+},
+
+categoryPill:{
+paddingHorizontal:22,
+paddingVertical:12,
+borderRadius:30,
+
+shadowColor:'#1e3a8a',
+shadowOffset:{width:0,height:8},
+shadowOpacity:0.25,
+shadowRadius:14,
+elevation:8
+},
+
+categoryPillInactive:{
+backgroundColor:'#ffffff',
+
+shadowColor:'#0f172a',
+shadowOffset:{width:0,height:3},
+shadowOpacity:0.06,
+shadowRadius:6,
+elevation:3
+},
+
+categoryText:{
+fontSize:14,
+fontWeight:'600',
+color:'#475569'
+},
+
+categoryTextActive:{
+color:'#ffffff'
+},
+
+feedContainer:{
+flex:1,
+paddingHorizontal:20,
+marginTop:6
+},
+
+feedHeader:{
+flexDirection:'row',
+justifyContent:'space-between',
+alignItems:'center',
+marginVertical:20
+},
+
+feedTitle:{
+fontSize:21,
+fontWeight:'800',
+color:'#020617',
+letterSpacing:0.3
+},
+
+badge:{
+backgroundColor:'#dbeafe',
+paddingHorizontal:14,
+paddingVertical:6,
+borderRadius:14
+},
+
+badgeText:{
+color:'#1e3a8a',
+fontSize:12,
+fontWeight:'700'
+},
+
+loader:{
+marginTop:60
+},
+
+errorText:{
+color:'#dc2626',
+textAlign:'center',
+marginTop:50,
+fontSize:16
+},
+
+emptyText:{
+color:'#64748b',
+textAlign:'center',
+marginTop:50,
+fontSize:16
+}
+
 });

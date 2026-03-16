@@ -8,7 +8,9 @@ import {
     StyleSheet, 
     ActivityIndicator,
     Alert,
-    Image
+    Image,
+    SafeAreaView,
+    Platform
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Store, MapPin, Phone, AlignLeft, Building2, ImagePlus, X } from 'lucide-react-native';
@@ -18,7 +20,6 @@ import { apiClient } from '../../core/api/apiClient';
 import { useAuthStore } from '../../core/store/authStore';
 import { useNavigation } from '@react-navigation/native';
 
-// 🚨 UPDATED: Exact categories from your Mongoose Schema
 const categories = ['Cleaning', 'Beauty', 'Repair', 'Health', 'Automotive', 'Education', 'Other'];
 
 export default function RegisterBusinessScreen() {
@@ -27,17 +28,15 @@ export default function RegisterBusinessScreen() {
 
     const [isLoading, setIsLoading] = useState(false);
     
-    // 🚨 UPDATED: Added 'city' to match your Schema
     const [formData, setFormData] = useState({
         name: '',
         description: '',
-        category: 'Cleaning', // Default to first enum option
+        category: 'Cleaning', 
         city: '',
         address: '',
         phone: ''
     });
 
-    // Image States
     const [coverImage, setCoverImage] = useState(null);
     const [galleryImages, setGalleryImages] = useState([]);
 
@@ -62,13 +61,13 @@ export default function RegisterBusinessScreen() {
         let result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.Images,
             allowsMultipleSelection: true,
-            selectionLimit: 5 - galleryImages.length, // Only allow them to pick up to the limit
+            selectionLimit: 5 - galleryImages.length, 
             quality: 0.8,
         });
 
         if (!result.canceled) {
             const newImages = result.assets.map(asset => asset.uri);
-            setGalleryImages([...galleryImages, ...newImages].slice(0, 5)); // Enforce max 5
+            setGalleryImages([...galleryImages, ...newImages].slice(0, 5)); 
         }
     };
 
@@ -77,7 +76,6 @@ export default function RegisterBusinessScreen() {
     };
 
     const handleRegister = async () => {
-        // 1. Validate required fields (including City!)
         if (!formData.name || !formData.description || !formData.city || !formData.address || !formData.phone) {
             Alert.alert("Missing Fields", "Please fill out all required text fields.");
             return;
@@ -85,7 +83,6 @@ export default function RegisterBusinessScreen() {
 
         setIsLoading(true);
         try {
-            // 🚨 THE FIX: Convert to FormData so Multer can process the images!
             const data = new FormData();
             data.append('name', formData.name);
             data.append('description', formData.description);
@@ -94,7 +91,6 @@ export default function RegisterBusinessScreen() {
             data.append('address', formData.address);
             data.append('phone', formData.phone);
 
-            // Append Cover Image if selected
             if (coverImage) {
                 const filename = coverImage.split('/').pop();
                 const match = /\.(\w+)$/.exec(filename);
@@ -102,7 +98,6 @@ export default function RegisterBusinessScreen() {
                 data.append('coverImage', { uri: coverImage, name: filename, type });
             }
 
-            // Append Gallery Images if selected
             galleryImages.forEach((imgUri) => {
                 const filename = imgUri.split('/').pop();
                 const match = /\.(\w+)$/.exec(filename);
@@ -110,7 +105,6 @@ export default function RegisterBusinessScreen() {
                 data.append('images', { uri: imgUri, name: filename, type });
             });
 
-            // 2. Send to backend with multipart/form-data header
             const response = await apiClient.post('/business', data, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
@@ -129,20 +123,28 @@ export default function RegisterBusinessScreen() {
     };
 
     return (
-        <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-            <LinearGradient colors={['#f43f5e', '#ec4899']} style={styles.header}>
-                <Text style={styles.headerTitle}>Become a Partner</Text>
-                <Text style={styles.headerSubtitle}>List your services and grow your business today.</Text>
+        <ScrollView style={styles.container} showsVerticalScrollIndicator={false} bounces={false}>
+            <LinearGradient colors={['#0f172a', '#1e3a8a']} style={styles.header}>
+                <SafeAreaView>
+                    <View style={styles.headerContent}>
+                        <View style={[styles.circle, styles.circleTopRight]} />
+                        <View style={[styles.circle, styles.circleBottomLeft]} />
+
+                        <Text style={styles.headerTitle}>Become a Partner</Text>
+                        <Text style={styles.headerSubtitle}>List your services and grow your business today.</Text>
+                    </View>
+                </SafeAreaView>
             </LinearGradient>
 
             <View style={styles.formContainer}>
                 
                 <Text style={styles.label}>Business Name *</Text>
                 <View style={styles.inputWrapper}>
-                    <Store color="#94a3b8" size={20} style={styles.icon} />
+                    <Store color="#64748b" size={20} style={styles.icon} />
                     <TextInput 
                         style={styles.input} 
                         placeholder="e.g. Luxe Studio" 
+                        placeholderTextColor="#94a3b8"
                         value={formData.name}
                         onChangeText={(text) => setFormData({...formData, name: text})}
                         maxLength={50}
@@ -154,20 +156,23 @@ export default function RegisterBusinessScreen() {
                     {categories.map((cat) => (
                         <TouchableOpacity 
                             key={cat} 
+                            activeOpacity={0.7}
                             onPress={() => setFormData({...formData, category: cat})}
                             style={[styles.categoryPill, formData.category === cat && styles.categoryPillActive]}
                         >
                             <Text style={[styles.categoryText, formData.category === cat && styles.categoryTextActive]}>{cat}</Text>
                         </TouchableOpacity>
                     ))}
+                    <View style={{ width: 24 }} />
                 </ScrollView>
 
                 <Text style={styles.label}>Description *</Text>
-                <View style={[styles.inputWrapper, { height: 100, alignItems: 'flex-start', paddingTop: 12 }]}>
-                    <AlignLeft color="#94a3b8" size={20} style={styles.icon} />
+                <View style={[styles.inputWrapper, styles.textAreaWrapper]}>
+                    <AlignLeft color="#64748b" size={20} style={[styles.icon, { marginTop: 4 }]} />
                     <TextInput 
-                        style={[styles.input, { height: 80, textAlignVertical: 'top' }]} 
+                        style={[styles.input, styles.textAreaInput]} 
                         placeholder="Tell clients what makes you great..." 
+                        placeholderTextColor="#94a3b8"
                         multiline 
                         value={formData.description}
                         onChangeText={(text) => setFormData({...formData, description: text})}
@@ -175,13 +180,13 @@ export default function RegisterBusinessScreen() {
                     />
                 </View>
 
-                {/* 🚨 NEW: City Field */}
                 <Text style={styles.label}>City *</Text>
                 <View style={styles.inputWrapper}>
-                    <Building2 color="#94a3b8" size={20} style={styles.icon} />
+                    <Building2 color="#64748b" size={20} style={styles.icon} />
                     <TextInput 
                         style={styles.input} 
                         placeholder="e.g. New York" 
+                        placeholderTextColor="#94a3b8"
                         value={formData.city}
                         onChangeText={(text) => setFormData({...formData, city: text})}
                     />
@@ -189,10 +194,11 @@ export default function RegisterBusinessScreen() {
 
                 <Text style={styles.label}>Full Address *</Text>
                 <View style={styles.inputWrapper}>
-                    <MapPin color="#94a3b8" size={20} style={styles.icon} />
+                    <MapPin color="#64748b" size={20} style={styles.icon} />
                     <TextInput 
                         style={styles.input} 
                         placeholder="123 Main St" 
+                        placeholderTextColor="#94a3b8"
                         value={formData.address}
                         onChangeText={(text) => setFormData({...formData, address: text})}
                     />
@@ -200,10 +206,11 @@ export default function RegisterBusinessScreen() {
 
                 <Text style={styles.label}>Phone Number *</Text>
                 <View style={styles.inputWrapper}>
-                    <Phone color="#94a3b8" size={20} style={styles.icon} />
+                    <Phone color="#64748b" size={20} style={styles.icon} />
                     <TextInput 
                         style={styles.input} 
                         placeholder="e.g. 555-0198" 
+                        placeholderTextColor="#94a3b8"
                         keyboardType="phone-pad"
                         value={formData.phone}
                         onChangeText={(text) => setFormData({...formData, phone: text})}
@@ -211,15 +218,14 @@ export default function RegisterBusinessScreen() {
                     />
                 </View>
 
-                {/* 🚨 NEW: Image Upload Section */}
                 <View style={styles.imageSection}>
                     <Text style={styles.label}>Cover Image (Optional)</Text>
-                    <TouchableOpacity style={styles.uploadButton} onPress={pickCoverImage}>
+                    <TouchableOpacity activeOpacity={0.8} style={styles.uploadButton} onPress={pickCoverImage}>
                         {coverImage ? (
                             <Image source={{ uri: coverImage }} style={styles.coverPreview} />
                         ) : (
                             <View style={styles.uploadPlaceholder}>
-                                <ImagePlus color="#94a3b8" size={28} />
+                                <ImagePlus color="#94a3b8" size={32} strokeWidth={1.5} />
                                 <Text style={styles.uploadText}>Tap to add cover photo</Text>
                             </View>
                         )}
@@ -227,35 +233,42 @@ export default function RegisterBusinessScreen() {
 
                     <Text style={styles.label}>Gallery Images (Max 5, Optional)</Text>
                     <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.galleryScrollContainer}>
-                        <TouchableOpacity style={styles.addGalleryButton} onPress={pickGalleryImages}>
-                            <ImagePlus color="#f43f5e" size={24} />
+                        <TouchableOpacity activeOpacity={0.7} style={styles.addGalleryButton} onPress={pickGalleryImages}>
+                            <ImagePlus color="#2563eb" size={28} strokeWidth={1.5} />
                         </TouchableOpacity>
                         
                         {galleryImages.map((uri, index) => (
                             <View key={index} style={styles.galleryThumbnailContainer}>
                                 <Image source={{ uri }} style={styles.galleryThumbnail} />
                                 <TouchableOpacity 
+                                    activeOpacity={0.8}
                                     style={styles.removeImageBtn} 
                                     onPress={() => removeGalleryImage(index)}
                                 >
-                                    <X color="#ffffff" size={14} />
+                                    <X color="#ffffff" size={14} strokeWidth={3} />
                                 </TouchableOpacity>
                             </View>
                         ))}
+                        <View style={{ width: 24 }} />
                     </ScrollView>
                 </View>
 
-                <TouchableOpacity 
-                    style={[styles.submitButton, isLoading && styles.submitButtonDisabled]} 
-                    onPress={handleRegister}
-                    disabled={isLoading}
-                >
-                    {isLoading ? (
-                        <ActivityIndicator color="#ffffff" />
-                    ) : (
-                        <Text style={styles.submitButtonText}>Register Business</Text>
-                    )}
-                </TouchableOpacity>
+                <View style={styles.submitButtonContainer}>
+                    <TouchableOpacity 
+                        style={[styles.submitButtonWrapper, isLoading && styles.submitButtonDisabled]} 
+                        onPress={handleRegister}
+                        disabled={isLoading}
+                        activeOpacity={0.8}
+                    >
+                        <LinearGradient colors={['#1e40af', '#3b82f6']} style={styles.submitGradient}>
+                            {isLoading ? (
+                                <ActivityIndicator color="#ffffff" />
+                            ) : (
+                                <Text style={styles.submitButtonText}>Register Business</Text>
+                            )}
+                        </LinearGradient>
+                    </TouchableOpacity>
+                </View>
 
             </View>
         </ScrollView>
@@ -263,35 +276,73 @@ export default function RegisterBusinessScreen() {
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#fafaf9' },
-    header: { padding: 40, paddingTop: 60, borderBottomLeftRadius: 30, borderBottomRightRadius: 30, alignItems: 'center' },
-    headerTitle: { fontSize: 28, fontWeight: '700', color: '#ffffff', marginBottom: 8 },
-    headerSubtitle: { fontSize: 15, color: 'rgba(255,255,255,0.9)', textAlign: 'center' },
-    formContainer: { padding: 20, marginTop: -20, backgroundColor: '#ffffff', borderTopLeftRadius: 30, borderTopRightRadius: 30 },
-    label: { fontSize: 14, fontWeight: '600', color: '#0f172a', marginBottom: 8, marginTop: 16 },
-    inputWrapper: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#f8fafc', borderWidth: 1, borderColor: '#e2e8f0', borderRadius: 16, paddingHorizontal: 16, height: 56 },
-    icon: { marginRight: 12 },
-    input: { flex: 1, fontSize: 16, color: '#0f172a' },
-    categoryScroll: { flexDirection: 'row', marginBottom: 8 },
-    categoryPill: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20, backgroundColor: '#f1f5f9', marginRight: 10, borderWidth: 1, borderColor: '#e2e8f0' },
-    categoryPillActive: { backgroundColor: '#f43f5e', borderColor: '#f43f5e' },
-    categoryText: { fontSize: 14, fontWeight: '500', color: '#64748b' },
-    categoryTextActive: { color: '#ffffff', fontWeight: '600' },
+    container: { flex: 1, backgroundColor: '#f8fafc' },
     
-    // Image Upload Styles
-    imageSection: { marginTop: 10, borderTopWidth: 1, borderTopColor: '#f1f5f9', paddingTop: 10 },
-    uploadButton: { height: 160, backgroundColor: '#f8fafc', borderRadius: 16, borderWidth: 1, borderColor: '#e2e8f0', borderStyle: 'dashed', overflow: 'hidden', marginBottom: 16 },
+    header: { 
+        paddingBottom: 64, 
+        borderBottomLeftRadius: 38, 
+        borderBottomRightRadius: 38, 
+        overflow: 'hidden',
+        shadowColor: '#020617',
+        shadowOffset: { width: 0, height: 12 },
+        shadowOpacity: 0.25,
+        shadowRadius: 24,
+        elevation: 15
+    },
+    headerContent: { 
+        paddingHorizontal: 24, 
+        paddingTop: Platform.OS === 'android' ? 40 : 26,
+        alignItems: 'center'
+    },
+    circle: { 
+        position: 'absolute', 
+        backgroundColor: 'rgba(255,255,255,0.07)', 
+        borderRadius: 100 
+    },
+    circleTopRight: { width: 200, height: 200, top: -80, right: -70 },
+    circleBottomLeft: { width: 150, height: 150, bottom: -60, left: -60 },
+    
+    headerTitle: { fontSize: 28, fontWeight: '800', color: '#ffffff', marginBottom: 8, letterSpacing: -0.5, marginTop: 10 },
+    headerSubtitle: { fontSize: 15, color: '#cbd5e1', textAlign: 'center', fontWeight: '500', paddingHorizontal: 20 },
+    
+    formContainer: { 
+        paddingHorizontal: 24, 
+        paddingTop: 32,
+        paddingBottom: 60,
+        marginTop: -32, 
+        backgroundColor: '#ffffff', 
+        borderTopLeftRadius: 32, 
+        borderTopRightRadius: 32 
+    },
+    
+    label: { fontSize: 14, fontWeight: '700', color: '#475569', marginBottom: 8, marginTop: 20, marginLeft: 4 },
+    inputWrapper: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#f8fafc', borderWidth: 1.5, borderColor: '#e2e8f0', borderRadius: 16, paddingHorizontal: 16, height: 60 },
+    textAreaWrapper: { height: 120, alignItems: 'flex-start', paddingTop: 16 },
+    icon: { marginRight: 12 },
+    input: { flex: 1, fontSize: 16, color: '#0f172a', fontWeight: '500' },
+    textAreaInput: { height: 90, textAlignVertical: 'top' },
+    
+    categoryScroll: { flexDirection: 'row', marginHorizontal: -24, paddingHorizontal: 24 },
+    categoryPill: { paddingHorizontal: 20, paddingVertical: 10, borderRadius: 16, backgroundColor: '#ffffff', marginRight: 12, borderWidth: 1.5, borderColor: '#e2e8f0' },
+    categoryPillActive: { backgroundColor: '#1e40af', borderColor: '#1e40af', shadowColor: '#1d4ed8', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 4 },
+    categoryText: { fontSize: 14, fontWeight: '600', color: '#64748b' },
+    categoryTextActive: { color: '#ffffff', fontWeight: '700' },
+    
+    imageSection: { marginTop: 24, borderTopWidth: 1, borderTopColor: '#f1f5f9', paddingTop: 8 },
+    uploadButton: { height: 180, backgroundColor: '#f8fafc', borderRadius: 20, borderWidth: 1.5, borderColor: '#cbd5e1', borderStyle: 'dashed', overflow: 'hidden', marginBottom: 16 },
     uploadPlaceholder: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-    uploadText: { marginTop: 8, fontSize: 14, color: '#64748b', fontWeight: '500' },
+    uploadText: { marginTop: 12, fontSize: 15, color: '#64748b', fontWeight: '600' },
     coverPreview: { width: '100%', height: '100%', resizeMode: 'cover' },
     
-    galleryScrollContainer: { flexDirection: 'row', paddingBottom: 10 },
-    addGalleryButton: { width: 80, height: 80, borderRadius: 12, backgroundColor: '#ffe4e6', justifyContent: 'center', alignItems: 'center', marginRight: 12, borderWidth: 1, borderColor: '#fecdd3', borderStyle: 'dashed' },
-    galleryThumbnailContainer: { marginRight: 12, position: 'relative' },
-    galleryThumbnail: { width: 80, height: 80, borderRadius: 12, resizeMode: 'cover' },
-    removeImageBtn: { position: 'absolute', top: -6, right: -6, backgroundColor: '#e11d48', width: 22, height: 22, borderRadius: 11, justifyContent: 'center', alignItems: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.2, shadowRadius: 3, elevation: 3 },
+    galleryScrollContainer: { flexDirection: 'row', paddingBottom: 16, marginHorizontal: -24, paddingHorizontal: 24 },
+    addGalleryButton: { width: 88, height: 88, borderRadius: 16, backgroundColor: '#eff6ff', justifyContent: 'center', alignItems: 'center', marginRight: 16, borderWidth: 1.5, borderColor: '#bfdbfe', borderStyle: 'dashed' },
+    galleryThumbnailContainer: { marginRight: 16, position: 'relative' },
+    galleryThumbnail: { width: 88, height: 88, borderRadius: 16, resizeMode: 'cover' },
+    removeImageBtn: { position: 'absolute', top: -8, right: -8, backgroundColor: '#dc2626', width: 26, height: 26, borderRadius: 13, justifyContent: 'center', alignItems: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.2, shadowRadius: 6, elevation: 4, borderWidth: 2, borderColor: '#ffffff' },
 
-    submitButton: { backgroundColor: '#f43f5e', height: 56, borderRadius: 16, justifyContent: 'center', alignItems: 'center', marginTop: 32, marginBottom: 40, shadowColor: '#f43f5e', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 5 },
-    submitButtonDisabled: { opacity: 0.7 },
-    submitButtonText: { color: '#ffffff', fontSize: 16, fontWeight: '700' }
+    submitButtonContainer: { marginTop: 40, marginBottom: 20 },
+    submitButtonWrapper: { width: '100%', borderRadius: 16, shadowColor: '#1d4ed8', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.35, shadowRadius: 16, elevation: 8 },
+    submitButtonDisabled: { opacity: 0.7, shadowOpacity: 0, elevation: 0 },
+    submitGradient: { height: 60, borderRadius: 16, justifyContent: 'center', alignItems: 'center' },
+    submitButtonText: { color: '#ffffff', fontSize: 17, fontWeight: '800', letterSpacing: 0.5 }
 });

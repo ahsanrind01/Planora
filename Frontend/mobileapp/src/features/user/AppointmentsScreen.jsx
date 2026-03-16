@@ -7,18 +7,19 @@ import {
     TouchableOpacity,
     SafeAreaView,
     ActivityIndicator,
-    Alert
+    Alert,
+    Platform
 } from 'react-native';
-import { useFocusEffect, useNavigation } from '@react-navigation/native'; // 🚨 NEW: Added useNavigation
+import { useFocusEffect, useNavigation } from '@react-navigation/native'; 
 import { LinearGradient } from 'expo-linear-gradient';
-import { Calendar, Clock, MapPin, Lock } from 'lucide-react-native'; // 🚨 NEW: Added Lock icon
+import { Calendar, Clock, MapPin, Lock, CalendarX2 } from 'lucide-react-native'; 
 
 import { useAppointmentStore } from '../../core/store/appointmentStore';
-import { useAuthStore } from '../../core/store/authStore'; // 🚨 NEW: Added Auth Store
+import { useAuthStore } from '../../core/store/authStore'; 
 
 export default function AppointmentsScreen() {
     const navigation = useNavigation();
-    const user = useAuthStore(state => state.user); // 🚨 NEW: Get the user
+    const user = useAuthStore(state => state.user); 
 
     const [activeTab, setActiveTab] = useState("upcoming");
 
@@ -26,7 +27,6 @@ export default function AppointmentsScreen() {
 
     useFocusEffect(
         useCallback(() => {
-            // 🚨 THE FIX: Only try to fetch appointments if the user is actually logged in!
             if (user) {
                 fetchMyAppointments();
             }
@@ -77,26 +77,26 @@ export default function AppointmentsScreen() {
         }
     };
 
-    // 🚨 THE BOUNCER: If they aren't logged in, show this instead of the list!
     if (!user) {
         return (
-            <View style={[styles.container, { justifyContent: 'center', alignItems: 'center', padding: 20 }]}>
-                <View style={{ width: 80, height: 80, borderRadius: 40, backgroundColor: '#ffe4e6', justifyContent: 'center', alignItems: 'center', marginBottom: 20 }}>
-                    <Calendar color="#f43f5e" size={40} />
+            <View style={styles.bouncerContainer}>
+                <View style={styles.bouncerIconBox}>
+                    <Lock color="#1e40af" size={40} strokeWidth={2} />
                 </View>
-                <Text style={{ fontSize: 24, fontWeight: '700', color: '#0f172a', marginBottom: 10, textAlign: 'center' }}>
-                    Your Appointments
+                <Text style={styles.bouncerTitle}>
+                    Your Bookings
                 </Text>
-                <Text style={{ fontSize: 16, color: '#64748b', textAlign: 'center', marginBottom: 30, paddingHorizontal: 20 }}>
+                <Text style={styles.bouncerSubtitle}>
                     Log in or sign up to view and manage your upcoming bookings.
                 </Text>
                 
                 <TouchableOpacity 
-                    style={{ width: '100%', borderRadius: 16, overflow: 'hidden' }}
+                    style={styles.bouncerButtonWrapper}
+                    activeOpacity={0.8}
                     onPress={() => navigation.navigate('Auth')}
                 >
-                    <LinearGradient colors={['#f43f5e', '#fb7185']} style={{ height: 56, justifyContent: 'center', alignItems: 'center' }}>
-                        <Text style={{ color: '#ffffff', fontSize: 16, fontWeight: '700' }}>Log In / Sign Up</Text>
+                    <LinearGradient colors={['#1e40af', '#3b82f6']} style={styles.bouncerButton}>
+                        <Text style={styles.bouncerButtonText}>Log In / Sign Up</Text>
                     </LinearGradient>
                 </TouchableOpacity>
             </View>
@@ -105,16 +105,17 @@ export default function AppointmentsScreen() {
 
     return (
         <View style={styles.container}>
-            <LinearGradient colors={['#f43f5e', '#ec4899']} style={styles.header}>
+            <LinearGradient colors={['#0f172a', '#1e3a8a']} style={styles.header}>
                 <SafeAreaView>
                     <View style={styles.headerContent}>
                         <View style={[styles.circle, styles.circleTopRight]} />
                         <View style={[styles.circle, styles.circleBottomLeft]} />
 
-                        <Text style={styles.title}>My Appointments</Text>
+                        <Text style={styles.title}>My Bookings</Text>
 
                         <View style={styles.segmentedControl}>
                             <TouchableOpacity
+                                activeOpacity={0.7}
                                 style={[styles.tabButton, activeTab === "upcoming" && styles.tabButtonActive]}
                                 onPress={() => setActiveTab("upcoming")}
                             >
@@ -123,6 +124,7 @@ export default function AppointmentsScreen() {
                                 </Text>
                             </TouchableOpacity>
                             <TouchableOpacity
+                                activeOpacity={0.7}
                                 style={[styles.tabButton, activeTab === "past" && styles.tabButtonActive]}
                                 onPress={() => setActiveTab("past")}
                             >
@@ -137,13 +139,13 @@ export default function AppointmentsScreen() {
 
             <ScrollView style={styles.listContainer} showsVerticalScrollIndicator={false}>
                 {isLoading ? (
-                    <ActivityIndicator size="large" color="#f43f5e" style={{ marginTop: 40 }} />
+                    <ActivityIndicator size="large" color="#2563eb" style={styles.loader} />
                 ) : error ? (
-                    <Text style={{ color: '#e11d48', textAlign: 'center', marginTop: 40, fontSize: 16 }}>{error}</Text>
+                    <Text style={styles.errorText}>{error}</Text>
                 ) : displayList.length === 0 ? (
                     <View style={styles.emptyState}>
                         <View style={styles.emptyIconBox}>
-                            <Calendar color="#f43f5e" size={40} />
+                            <CalendarX2 color="#3b82f6" size={40} strokeWidth={1.5} />
                         </View>
                         <Text style={styles.emptyTitle}>No {activeTab} appointments</Text>
                         <Text style={styles.emptySubtitle}>Your bookings will appear here</Text>
@@ -152,11 +154,9 @@ export default function AppointmentsScreen() {
                     <View style={styles.cardsWrapper}>
                         {displayList.map((appointment) => {
                             const statusStyle = getStatusColors(appointment.status);
-
                             const businessName = appointment.businessId?.name || "Unknown Business";
                             const businessAddress = appointment.businessId?.address || "Address unavailable";
                             const serviceName = appointment.serviceId?.name || "Unknown Service";
-
                             const { date: niceDate, time: niceTime } = formatDateTime(appointment.date);
 
                             return (
@@ -167,7 +167,7 @@ export default function AppointmentsScreen() {
                                             <Text style={styles.serviceName}>{serviceName}</Text>
                                         </View>
                                         <View style={[styles.statusBadge, { backgroundColor: statusStyle.bg }]}>
-                                            <Text style={[styles.statusText, { color: statusStyle.text, textTransform: 'capitalize' }]}>
+                                            <Text style={[styles.statusText, { color: statusStyle.text }]}>
                                                 {appointment.status || "Pending"}
                                             </Text>
                                         </View>
@@ -175,22 +175,23 @@ export default function AppointmentsScreen() {
 
                                     <View style={styles.infoRow}>
                                         <View style={styles.infoPill}>
-                                            <Calendar color="#f43f5e" size={16} />
+                                            <Calendar color="#2563eb" size={16} />
                                             <Text style={styles.infoText}>{niceDate}</Text>
                                         </View>
                                         <View style={styles.infoPill}>
-                                            <Clock color="#f43f5e" size={16} />
+                                            <Clock color="#2563eb" size={16} />
                                             <Text style={styles.infoText}>{niceTime}</Text>
                                         </View>
                                     </View>
 
                                     <View style={[styles.infoPill, styles.addressPill]}>
-                                        <MapPin color="#94a3b8" size={16} />
+                                        <MapPin color="#64748b" size={16} />
                                         <Text style={styles.addressText}>{businessAddress}</Text>
                                     </View>
 
                                     {activeTab === "upcoming" && (
                                         <TouchableOpacity
+                                            activeOpacity={0.7}
                                             style={styles.cancelButton}
                                             onPress={() => handleCancel(appointment._id)}
                                         >
@@ -209,36 +210,257 @@ export default function AppointmentsScreen() {
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#fafaf9' },
-    header: { paddingBottom: 24, borderBottomLeftRadius: 30, borderBottomRightRadius: 30, overflow: 'hidden' },
-    headerContent: { paddingHorizontal: 20, paddingTop: 20 },
-    circle: { position: 'absolute', backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: 100 },
-    circleTopRight: { width: 160, height: 160, top: -80, right: -80 },
-    circleBottomLeft: { width: 120, height: 120, bottom: -40, left: -40 },
-    title: { fontSize: 28, fontWeight: '700', color: '#ffffff', marginBottom: 16 },
-    segmentedControl: { flexDirection: 'row', backgroundColor: 'rgba(255,255,255,0.2)', padding: 6, borderRadius: 16 },
-    tabButton: { flex: 1, paddingVertical: 10, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
-    tabButtonActive: { backgroundColor: '#ffffff', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 8, elevation: 4 },
-    tabText: { fontSize: 14, fontWeight: '600', color: '#ffffff' },
-    tabTextActive: { color: '#f43f5e', fontWeight: '700' },
-    listContainer: { flex: 1, paddingHorizontal: 20, paddingTop: 20 },
-    emptyState: { alignItems: 'center', justifyContent: 'center', marginTop: 60 },
-    emptyIconBox: { width: 80, height: 80, borderRadius: 24, backgroundColor: '#ffe4e6', alignItems: 'center', justifyContent: 'center', marginBottom: 16 },
-    emptyTitle: { fontSize: 20, fontWeight: '700', color: '#0f172a', marginBottom: 8 },
-    emptySubtitle: { fontSize: 16, color: '#64748b' },
+    container: { 
+        flex: 1, 
+        backgroundColor: '#f8fafc' 
+    },
+
+    bouncerContainer: { 
+        flex: 1, 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        padding: 24,
+        backgroundColor: '#f8fafc'
+    },
+    bouncerIconBox: { 
+        width: 88, 
+        height: 88, 
+        borderRadius: 44, 
+        backgroundColor: '#dbeafe', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        marginBottom: 24,
+        shadowColor: '#1d4ed8',
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.15,
+        shadowRadius: 16,
+        elevation: 5
+    },
+    bouncerTitle: { 
+        fontSize: 26, 
+        fontWeight: '700', 
+        color: '#0f172a', 
+        marginBottom: 12, 
+        textAlign: 'center',
+        letterSpacing: -0.5
+    },
+    bouncerSubtitle: { 
+        fontSize: 16, 
+        color: '#64748b', 
+        textAlign: 'center', 
+        marginBottom: 40, 
+        paddingHorizontal: 20,
+        lineHeight: 24
+    },
+    bouncerButtonWrapper: { 
+        width: '100%', 
+        maxWidth: 350,
+        borderRadius: 16, 
+        overflow: 'hidden',
+        shadowColor: '#1d4ed8',
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.25,
+        shadowRadius: 16,
+        elevation: 8
+    },
+    bouncerButton: { 
+        height: 60, 
+        justifyContent: 'center', 
+        alignItems: 'center' 
+    },
+    bouncerButtonText: { 
+        color: '#ffffff', 
+        fontSize: 16, 
+        fontWeight: '800',
+        letterSpacing: 0.5 
+    },
+
+    header: { 
+        paddingBottom: 24, 
+        borderBottomLeftRadius: 32, 
+        borderBottomRightRadius: 32, 
+        overflow: 'hidden' 
+    },
+    headerContent: { 
+        paddingHorizontal: 24, 
+        paddingTop: Platform.OS === 'android' ? 40 : 20 
+    },
+    circle: { 
+        position: 'absolute', 
+        backgroundColor: 'rgba(255,255,255,0.03)', 
+        borderRadius: 999 
+    },
+    circleTopRight: { width: 200, height: 200, top: -80, right: -60 },
+    circleBottomLeft: { width: 140, height: 140, bottom: -50, left: -40 },
+    title: { 
+        fontSize: 30, 
+        fontWeight: '700', 
+        color: '#ffffff', 
+        marginBottom: 20,
+        letterSpacing: -0.5 
+    },
+    
+    segmentedControl: { 
+        flexDirection: 'row', 
+        backgroundColor: 'rgba(255, 255, 255, 0.15)', 
+        padding: 6, 
+        borderRadius: 20,
+        borderWidth: 1,
+        borderColor: 'rgba(255, 255, 255, 0.2)'
+    },
+    tabButton: { 
+        flex: 1, 
+        paddingVertical: 12, 
+        borderRadius: 16, 
+        alignItems: 'center', 
+        justifyContent: 'center' 
+    },
+    tabButtonActive: { 
+        backgroundColor: '#ffffff', 
+        shadowColor: '#000', 
+        shadowOffset: { width: 0, height: 4 }, 
+        shadowOpacity: 0.1, 
+        shadowRadius: 8, 
+        elevation: 4 
+    },
+    tabText: { 
+        fontSize: 15, 
+        fontWeight: '600', 
+        color: 'rgba(255, 255, 255, 0.8)' 
+    },
+    tabTextActive: { 
+        color: '#1d4ed8', 
+        fontWeight: '800' 
+    },
+
+    listContainer: { 
+        flex: 1, 
+        paddingHorizontal: 24, 
+        paddingTop: 24 
+    },
+    loader: { marginTop: 60 },
+    errorText: { 
+        color: '#ef4444', 
+        textAlign: 'center', 
+        marginTop: 60, 
+        fontSize: 16,
+        fontWeight: '500' 
+    },
+    emptyState: { 
+        alignItems: 'center', 
+        justifyContent: 'center', 
+        marginTop: 80 
+    },
+    emptyIconBox: { 
+        width: 88, 
+        height: 88, 
+        borderRadius: 24, 
+        backgroundColor: '#eff6ff', 
+        alignItems: 'center', 
+        justifyContent: 'center', 
+        marginBottom: 20 
+    },
+    emptyTitle: { 
+        fontSize: 22, 
+        fontWeight: '800', 
+        color: '#0f172a', 
+        marginBottom: 8 
+    },
+    emptySubtitle: { 
+        fontSize: 16, 
+        color: '#64748b',
+        fontWeight: '500' 
+    },
+    
     cardsWrapper: { gap: 16 },
-    card: { backgroundColor: '#ffffff', borderRadius: 20, padding: 20, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.05, shadowRadius: 10, elevation: 3, borderWidth: 1, borderColor: '#f1f5f9' },
-    cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 },
-    cardTitleBox: { flex: 1, paddingRight: 10 },
-    providerName: { fontSize: 18, fontWeight: '700', color: '#0f172a', marginBottom: 4 },
-    serviceName: { fontSize: 14, fontWeight: '500', color: '#64748b' },
-    statusBadge: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20 },
-    statusText: { fontSize: 12, fontWeight: '700' },
-    infoRow: { flexDirection: 'row', gap: 12, marginBottom: 12 },
-    infoPill: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#f8fafc', paddingHorizontal: 12, paddingVertical: 8, borderRadius: 12, gap: 8 },
-    infoText: { fontSize: 14, fontWeight: '600', color: '#0f172a' },
-    addressPill: { marginBottom: 16 },
-    addressText: { fontSize: 14, fontWeight: '500', color: '#64748b' },
-    cancelButton: { width: '100%', paddingVertical: 12, borderRadius: 14, alignItems: 'center', justifyContent: 'center', backgroundColor: '#fff1f2' },
-    cancelButtonText: { color: '#e11d48', fontSize: 15, fontWeight: '700' }
+    card: { 
+        backgroundColor: '#ffffff', 
+        borderRadius: 24, 
+        padding: 20, 
+        shadowColor: '#0f172a', 
+        shadowOffset: { width: 0, height: 8 }, 
+        shadowOpacity: 0.06, 
+        shadowRadius: 16, 
+        elevation: 4, 
+        borderWidth: 1, 
+        borderColor: '#f1f5f9' 
+    },
+    cardHeader: { 
+        flexDirection: 'row', 
+        justifyContent: 'space-between', 
+        alignItems: 'flex-start', 
+        marginBottom: 20 
+    },
+    cardTitleBox: { 
+        flex: 1, 
+        paddingRight: 12 
+    },
+    providerName: { 
+        fontSize: 19, 
+        fontWeight: '00', 
+        color: '#0f172a', 
+        marginBottom: 6,
+        letterSpacing: -0.3 
+    },
+    serviceName: { 
+        fontSize: 15, 
+        fontWeight: '600', 
+        color: '#64748b' 
+    },
+    statusBadge: { 
+        paddingHorizontal: 12, 
+        paddingVertical: 6, 
+        borderRadius: 12 
+    },
+    statusText: { 
+        fontSize: 13, 
+        fontWeight: '700',
+        textTransform: 'capitalize',
+        letterSpacing: 0.3 
+    },
+    
+    infoRow: { 
+        flexDirection: 'row', 
+        gap: 12, 
+        marginBottom: 12 
+    },
+    infoPill: { 
+        flexDirection: 'row', 
+        alignItems: 'center', 
+        backgroundColor: '#f8fafc', 
+        paddingHorizontal: 12, 
+        paddingVertical: 10, 
+        borderRadius: 12, 
+        gap: 8,
+        borderWidth: 1,
+        borderColor: '#f1f5f9'
+    },
+    infoText: { 
+        fontSize: 14, 
+        fontWeight: '700', 
+        color: '#0f172a' 
+    },
+    addressPill: { 
+        marginBottom: 20 
+    },
+    addressText: { 
+        fontSize: 14, 
+        fontWeight: '500', 
+        color: '#475569',
+        flex: 1
+    },
+    
+    cancelButton: { 
+        width: '100%', 
+        paddingVertical: 14, 
+        borderRadius: 14, 
+        alignItems: 'center', 
+        justifyContent: 'center', 
+        backgroundColor: '#fff1f2' 
+    },
+    cancelButtonText: { 
+        color: '#e11d48', 
+        fontSize: 15, 
+        fontWeight: '700' 
+    }
 });

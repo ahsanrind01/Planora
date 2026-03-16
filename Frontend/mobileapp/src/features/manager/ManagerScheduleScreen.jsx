@@ -26,7 +26,6 @@ export default function ManagerScheduleScreen() {
     const [activeTimeType, setActiveTimeType] = useState(null); 
     const [pickerDate, setPickerDate] = useState(new Date());
 
-    // 🚨 THE FIX IS HERE: It now actively watches user?.businessId
     useEffect(() => {
         if (user?.businessId) {
             fetchSchedule();
@@ -34,7 +33,6 @@ export default function ManagerScheduleScreen() {
     }, [user?.businessId]);
 
     const fetchSchedule = async () => {
-        // Double-check we actually have the ID before making the network request
         if (!user?.businessId) return; 
 
         setIsLoading(true);
@@ -125,17 +123,25 @@ export default function ManagerScheduleScreen() {
     };
 
     if (isLoading) {
-        return <View style={[styles.container, { justifyContent: 'center' }]}><ActivityIndicator size="large" color="#f43f5e" /></View>;
+        return (
+            <View style={[styles.container, { justifyContent: 'center' }]}>
+                <ActivityIndicator size="large" color="#2563eb" />
+            </View>
+        );
     }
 
     return (
         <View style={styles.container}>
-            <LinearGradient colors={['#f43f5e', '#ec4899']} style={styles.header}>
+            <LinearGradient colors={['#0f172a', '#1e3a8a']} style={styles.header}>
                 <SafeAreaView>
                     <View style={styles.headerContent}>
                         <View style={[styles.circle, styles.circleTopRight]} />
+                        <View style={[styles.circle, styles.circleBottomLeft]} />
+
                         <View style={styles.headerTitleRow}>
-                            <CalendarDays color="#ffffff" size={28} />
+                            <View style={styles.iconBackground}>
+                                <CalendarDays color="#ffffff" size={26} strokeWidth={2.5} />
+                            </View>
                             <Text style={styles.headerTitle}>Operating Hours</Text>
                         </View>
                         <Text style={styles.headerSubtitle}>Set when clients can book appointments with you.</Text>
@@ -149,10 +155,11 @@ export default function ManagerScheduleScreen() {
                         <View key={dayObj.day} style={[styles.dayRow, index === schedule.length - 1 && styles.lastRow]}>
                             
                             <View style={styles.dayInfo}>
+                                {/* 🎨 UI UPGRADE: Synced switch colors to Royal Blue */}
                                 <Switch
-                                    trackColor={{ false: '#cbd5e1', true: '#fbcfe8' }}
-                                    thumbColor={dayObj.isOpen ? '#f43f5e' : '#f8fafc'}
-                                    ios_backgroundColor="#cbd5e1"
+                                    trackColor={{ false: '#e2e8f0', true: '#bfdbfe' }}
+                                    thumbColor={dayObj.isOpen ? '#2563eb' : '#f8fafc'}
+                                    ios_backgroundColor="#e2e8f0"
                                     onValueChange={() => toggleDay(index)}
                                     value={dayObj.isOpen}
                                 />
@@ -161,11 +168,19 @@ export default function ManagerScheduleScreen() {
 
                             {dayObj.isOpen ? (
                                 <View style={styles.timeContainer}>
-                                    <TouchableOpacity style={styles.timeButton} onPress={() => openTimePicker(index, 'startTime')}>
+                                    <TouchableOpacity 
+                                        activeOpacity={0.7}
+                                        style={styles.timeButton} 
+                                        onPress={() => openTimePicker(index, 'startTime')}
+                                    >
                                         <Text style={styles.timeText}>{formatTimeDisplay(dayObj.startTime)}</Text>
                                     </TouchableOpacity>
                                     <Text style={styles.timeDivider}>-</Text>
-                                    <TouchableOpacity style={styles.timeButton} onPress={() => openTimePicker(index, 'endTime')}>
+                                    <TouchableOpacity 
+                                        activeOpacity={0.7}
+                                        style={styles.timeButton} 
+                                        onPress={() => openTimePicker(index, 'endTime')}
+                                    >
                                         <Text style={styles.timeText}>{formatTimeDisplay(dayObj.endTime)}</Text>
                                     </TouchableOpacity>
                                 </View>
@@ -182,23 +197,30 @@ export default function ManagerScheduleScreen() {
                     style={[styles.saveButtonWrapper, isSaving && styles.saveButtonDisabled]} 
                     onPress={handleSave}
                     disabled={isSaving}
+                    activeOpacity={0.8}
                 >
-                    <LinearGradient colors={['#f43f5e', '#fb7185']} style={styles.saveButton}>
+                    <LinearGradient colors={['#1e40af', '#3b82f6']} style={styles.saveButton}>
                         {isSaving ? (
                             <ActivityIndicator color="#ffffff" />
                         ) : (
                             <>
-                                <Save color="#ffffff" size={20} style={{ marginRight: 8 }} />
+                                <Save color="#ffffff" size={20} style={{ marginRight: 8 }} strokeWidth={2.5} />
                                 <Text style={styles.saveButtonText}>Save Schedule</Text>
                             </>
                         )}
                     </LinearGradient>
                 </TouchableOpacity>
-                <View style={{ height: 40 }} />
+                <View style={{ height: 60 }} />
             </ScrollView>
 
             {showPicker && (
-                <View style={{ backgroundColor: '#ffffff' }}> 
+                <View style={styles.pickerContainer}> 
+                    <View style={styles.pickerHeader}>
+                        <Text style={styles.pickerTitle}>Select Time</Text>
+                        <TouchableOpacity onPress={() => setShowPicker(false)}>
+                            <Text style={styles.pickerDoneText}>Done</Text>
+                        </TouchableOpacity>
+                    </View>
                     <DateTimePicker
                         value={pickerDate}
                         mode="time"
@@ -207,46 +229,220 @@ export default function ManagerScheduleScreen() {
                         onChange={onTimeChange}
                         textColor="#0f172a" 
                         themeVariant="light"
+                        style={{ height: 200 }}
                     />
                 </View>
-            )}
-            
-            {showPicker && Platform.OS === 'ios' && (
-                <TouchableOpacity 
-                    style={{ backgroundColor: '#f1f5f9', padding: 15, alignItems: 'center', paddingBottom: 30 }} 
-                    onPress={() => setShowPicker(false)}
-                >
-                    <Text style={{ color: '#f43f5e', fontWeight: 'bold', fontSize: 16 }}>Done</Text>
-                </TouchableOpacity>
             )}
         </View>
     );
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#fafaf9' },
-    header: { paddingBottom: 30, borderBottomLeftRadius: 30, borderBottomRightRadius: 30, overflow: 'hidden' },
-    headerContent: { paddingHorizontal: 20, paddingTop: 20 },
-    circle: { position: 'absolute', backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: 100 },
-    circleTopRight: { width: 150, height: 150, top: -50, right: -50 },
-    headerTitleRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 8 },
-    headerTitle: { fontSize: 26, fontWeight: '700', color: '#ffffff', marginLeft: 10 },
-    headerSubtitle: { fontSize: 15, color: 'rgba(255,255,255,0.9)' },
-    content: { paddingHorizontal: 20, paddingTop: 20 },
-    card: { backgroundColor: '#ffffff', borderRadius: 20, padding: 16, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.05, shadowRadius: 10, elevation: 3, borderWidth: 1, borderColor: '#f1f5f9', marginBottom: 24 },
-    dayRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 16, borderBottomWidth: 1, borderBottomColor: '#f1f5f9' },
-    lastRow: { borderBottomWidth: 0 },
-    dayInfo: { flexDirection: 'row', alignItems: 'center', width: 140 },
-    dayText: { fontSize: 16, fontWeight: '600', color: '#0f172a', marginLeft: 12 },
-    dayTextClosed: { color: '#94a3b8' },
-    timeContainer: { flexDirection: 'row', alignItems: 'center', flex: 1, justifyContent: 'flex-end' },
-    timeButton: { backgroundColor: '#f8fafc', paddingHorizontal: 12, paddingVertical: 8, borderRadius: 10, borderWidth: 1, borderColor: '#e2e8f0' },
-    timeText: { fontSize: 13, fontWeight: '600', color: '#0f172a' },
-    timeDivider: { marginHorizontal: 8, color: '#94a3b8', fontWeight: 'bold' },
-    closedContainer: { flex: 1, alignItems: 'flex-end', justifyContent: 'center' },
-    closedText: { fontSize: 14, fontWeight: '600', color: '#ef4444', fontStyle: 'italic', paddingRight: 10 },
-    saveButtonWrapper: { width: '100%', borderRadius: 16, overflow: 'hidden', shadowColor: '#f43f5e', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 5 },
-    saveButtonDisabled: { opacity: 0.7 },
-    saveButton: { height: 56, flexDirection: 'row', justifyContent: 'center', alignItems: 'center' },
-    saveButtonText: { color: '#ffffff', fontSize: 16, fontWeight: '700' }
+    container: { 
+        flex: 1, 
+        backgroundColor: '#f8fafc' 
+    },
+    
+    header:{
+        paddingBottom: 36,
+        borderBottomLeftRadius: 38,
+        borderBottomRightRadius: 38,
+        overflow: 'hidden',
+        
+        shadowColor: '#020617',
+        shadowOffset: { width: 0, height: 12 },
+        shadowOpacity: 0.25,
+        shadowRadius: 24,
+        elevation: 15
+    },
+    headerContent:{
+        paddingHorizontal: 24,
+        paddingTop: Platform.OS === 'android' ? 40 : 26
+    },
+    circle:{
+        position: 'absolute',
+        backgroundColor: 'rgba(255,255,255,0.07)',
+        borderRadius: 100
+    },
+    circleTopRight:{
+        width: 200,
+        height: 200,
+        top: -80,
+        right: -70
+    },
+    circleBottomLeft:{
+        width: 150,
+        height: 150,
+        bottom: -60,
+        left: -60
+    },
+
+    headerTitleRow: { 
+        flexDirection: 'row', 
+        alignItems: 'center', 
+        marginBottom: 12,
+        marginTop: 10
+    },
+    iconBackground: {
+        backgroundColor: 'rgba(255,255,255,0.15)',
+        padding: 8,
+        borderRadius: 12,
+        marginRight: 12
+    },
+    headerTitle: { 
+        fontSize: 28, 
+        fontWeight: '800', 
+        color: '#ffffff',
+        letterSpacing: -0.5 
+    },
+    headerSubtitle: { 
+        fontSize: 15, 
+        color: '#cbd5e1',
+        fontWeight: '500',
+        paddingRight: 20,
+        lineHeight: 22
+    },
+
+    content: { 
+        paddingHorizontal: 24, 
+        paddingTop: 32 
+    },
+    card: { 
+        backgroundColor: '#ffffff', 
+        borderRadius: 24, 
+        paddingHorizontal: 20,
+        paddingVertical: 8,
+        shadowColor: '#0f172a', 
+        shadowOffset: { width: 0, height: 8 }, 
+        shadowOpacity: 0.05, 
+        shadowRadius: 16, 
+        elevation: 3, 
+        borderWidth: 1, 
+        borderColor: '#f1f5f9', 
+        marginBottom: 32 
+    },
+    dayRow: { 
+        flexDirection: 'row', 
+        justifyContent: 'space-between', 
+        alignItems: 'center', 
+        paddingVertical: 18, 
+        borderBottomWidth: 1, 
+        borderBottomColor: '#f1f5f9' 
+    },
+    lastRow: { 
+        borderBottomWidth: 0 
+    },
+    dayInfo: { 
+        flexDirection: 'row', 
+        alignItems: 'center', 
+        width: 150 
+    },
+    dayText: { 
+        fontSize: 16, 
+        fontWeight: '700', 
+        color: '#0f172a', 
+        marginLeft: 14,
+        letterSpacing: 0.2
+    },
+    dayTextClosed: { 
+        color: '#94a3b8',
+        fontWeight: '600'
+    },
+    timeContainer: { 
+        flexDirection: 'row', 
+        alignItems: 'center', 
+        flex: 1, 
+        justifyContent: 'flex-end' 
+    },
+    timeButton: { 
+        backgroundColor: '#f8fafc', 
+        paddingHorizontal: 12, 
+        paddingVertical: 10, 
+        borderRadius: 12, 
+        borderWidth: 1.5, 
+        borderColor: '#e2e8f0',
+        minWidth: 80,
+        alignItems: 'center'
+    },
+    timeText: { 
+        fontSize: 14, 
+        fontWeight: '700', 
+        color: '#1e40af' 
+    },
+    timeDivider: { 
+        marginHorizontal: 8, 
+        color: '#cbd5e1', 
+        fontWeight: '800' 
+    },
+    closedContainer: { 
+        flex: 1, 
+        alignItems: 'flex-end', 
+        justifyContent: 'center',
+        paddingRight: 8
+    },
+    closedText: { 
+        fontSize: 15, 
+        fontWeight: '700', 
+        color: '#dc2626', 
+        fontStyle: 'italic'
+    },
+
+    saveButtonWrapper: { 
+        width: '100%', 
+        borderRadius: 16, 
+        shadowColor: '#1d4ed8', 
+        shadowOffset: { width: 0, height: 8 }, 
+        shadowOpacity: 0.35, 
+        shadowRadius: 16, 
+        elevation: 8 
+    },
+    saveButtonDisabled: { 
+        opacity: 0.7,
+        shadowOpacity: 0,
+        elevation: 0
+    },
+    saveButton: { 
+        height: 60, 
+        flexDirection: 'row', 
+        justifyContent: 'center', 
+        alignItems: 'center',
+        borderRadius: 16
+    },
+    saveButtonText: { 
+        color: '#ffffff', 
+        fontSize: 17, 
+        fontWeight: '800',
+        letterSpacing: 0.5 
+    },
+
+    pickerContainer: {
+        backgroundColor: '#ffffff',
+        borderTopLeftRadius: 24,
+        borderTopRightRadius: 24,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: -8 },
+        shadowOpacity: 0.1,
+        shadowRadius: 16,
+        elevation: 20,
+        paddingBottom: Platform.OS === 'ios' ? 30 : 0
+    },
+    pickerHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingHorizontal: 24,
+        paddingVertical: 16,
+        borderBottomWidth: 1,
+        borderBottomColor: '#f1f5f9'
+    },
+    pickerTitle: {
+        fontSize: 16,
+        fontWeight: '700',
+        color: '#0f172a'
+    },
+    pickerDoneText: {
+        color: '#2563eb', 
+        fontWeight: '800',
+        fontSize: 16
+    }
 });

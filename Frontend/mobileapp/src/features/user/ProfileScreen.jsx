@@ -25,7 +25,6 @@ export default function ProfileScreen() {
     const [editProfileOpen, setEditProfileOpen] = useState(false);
     const [changePasswordOpen, setChangePasswordOpen] = useState(false);
 
-    // Form States
     const [editName, setEditName] = useState(user?.name || '');
     const [editEmail, setEditEmail] = useState(user?.email || '');
     const [currentPassword, setCurrentPassword] = useState('');
@@ -64,26 +63,26 @@ export default function ProfileScreen() {
         return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
     };
 
-    // 🚨 THE BOUNCER: If they aren't logged in, show this instead of the Profile!
     if (!user) {
         return (
-            <View style={[styles.container, { justifyContent: 'center', alignItems: 'center', padding: 20 }]}>
-                <View style={{ width: 80, height: 80, borderRadius: 40, backgroundColor: '#ffe4e6', justifyContent: 'center', alignItems: 'center', marginBottom: 20 }}>
-                    <Lock color="#f43f5e" size={40} />
+            <View style={styles.bouncerContainer}>
+                <View style={styles.bouncerIconBox}>
+                    <Lock color="#1e40af" size={40} strokeWidth={2} />
                 </View>
-                <Text style={{ fontSize: 24, fontWeight: '700', color: '#0f172a', marginBottom: 10, textAlign: 'center' }}>
+                <Text style={styles.bouncerTitle}>
                     Create your profile
                 </Text>
-                <Text style={{ fontSize: 16, color: '#64748b', textAlign: 'center', marginBottom: 30, paddingHorizontal: 20 }}>
+                <Text style={styles.bouncerSubtitle}>
                     Log in or sign up to manage your appointments, register a business, and update your settings.
                 </Text>
                 
                 <TouchableOpacity 
-                    style={{ width: '100%', borderRadius: 16, overflow: 'hidden' }}
+                    style={styles.bouncerButtonWrapper}
+                    activeOpacity={0.8}
                     onPress={() => navigation.navigate('Auth')}
                 >
-                    <LinearGradient colors={['#f43f5e', '#fb7185']} style={{ height: 56, justifyContent: 'center', alignItems: 'center' }}>
-                        <Text style={{ color: '#ffffff', fontSize: 16, fontWeight: '700' }}>Log In / Sign Up</Text>
+                    <LinearGradient colors={['#1e40af', '#3b82f6']} style={styles.bouncerButton}>
+                        <Text style={styles.bouncerButtonText}>Log In / Sign Up</Text>
                     </LinearGradient>
                 </TouchableOpacity>
             </View>
@@ -93,7 +92,8 @@ export default function ProfileScreen() {
     return (
         <View style={styles.container}>
             <ScrollView showsVerticalScrollIndicator={false} bounces={false}>
-                <LinearGradient colors={['#f43f5e', '#ec4899']} style={styles.header}>
+                
+                <LinearGradient colors={['#0f172a', '#1e3a8a']} style={styles.header}>
                     <SafeAreaView>
                         <View style={styles.headerContent}>
                             <View style={[styles.circle, styles.circleTopRight]} />
@@ -108,9 +108,9 @@ export default function ProfileScreen() {
                                     <Text style={styles.userName}>{user?.name || "Guest User"}</Text>
                                     <Text style={styles.userEmail}>{user?.email || "No email provided"}</Text>
                                     
-                                    <View style={{ alignSelf: 'flex-start', marginTop: 4 }}>
+                                    <View style={{ alignSelf: 'flex-start', marginTop: 6 }}>
                                         <View style={styles.roleBadge}>
-                                            <ShieldCheck color="#ffffff" size={12} style={{ marginRight: 4 }} />
+                                            <ShieldCheck color="#ffffff" size={14} style={{ marginRight: 6 }} />
                                             <Text style={styles.roleText}>{user?.role?.toUpperCase() || "CUSTOMER"}</Text>
                                         </View>
                                     </View>
@@ -126,9 +126,9 @@ export default function ProfileScreen() {
                             activeOpacity={0.9} 
                             onPress={() => navigation.navigate('RegisterBusiness')}
                         >
-                            <LinearGradient colors={['#8b5cf6', '#7c3aed']} style={styles.ctaCard}>
+                            <LinearGradient colors={['#064909ff', '#44c867ff']} style={styles.ctaCard}>
                                 <View style={styles.ctaIconContainer}>
-                                    <Store color="#ffffff" size={28} />
+                                    <Store color="#ffffff" size={26} strokeWidth={2.5} />
                                 </View>
                                 <View style={styles.ctaTextContainer}>
                                     <Text style={styles.ctaTitle}>Register Your Business</Text>
@@ -140,32 +140,44 @@ export default function ProfileScreen() {
                     </View>
                 )}
 
-                <View style={[styles.menuContainer, user?.role === 'manager' && { paddingTop: 20 }]}>
+                <View style={[styles.menuContainer, user?.role === 'manager' && { paddingTop: 24 }]}>
                     <Text style={styles.sectionTitle}>ACCOUNT SETTINGS</Text>
 
-                    <TouchableOpacity style={styles.menuItem} onPress={() => {
-                        setEditName(user?.name || '');
-                        setEditEmail(user?.email || '');
-                        setEditProfileOpen(true);
-                    }}>
+                    <TouchableOpacity 
+                        style={styles.menuItem} 
+                        activeOpacity={0.7}
+                        onPress={() => {
+                            setEditName(user?.name || '');
+                            setEditEmail(user?.email || '');
+                            setEditProfileOpen(true);
+                        }}
+                    >
                         <View style={styles.menuIconBox}>
-                            <User color="#f43f5e" size={20} />
+                            <User color="#2563eb" size={20} strokeWidth={2.5} />
                         </View>
                         <Text style={styles.menuItemText}>Edit Profile Info</Text>
                         <ChevronRight color="#cbd5e1" size={20} />
                     </TouchableOpacity>
 
-                    <TouchableOpacity style={styles.menuItem} onPress={() => setChangePasswordOpen(true)}>
+                    <TouchableOpacity 
+                        style={styles.menuItem} 
+                        activeOpacity={0.7}
+                        onPress={() => setChangePasswordOpen(true)}
+                    >
                         <View style={styles.menuIconBox}>
-                            <Lock color="#f43f5e" size={20} />
+                            <Lock color="#2563eb" size={20} strokeWidth={2.5} />
                         </View>
                         <Text style={styles.menuItemText}>Change Password</Text>
                         <ChevronRight color="#cbd5e1" size={20} />
                     </TouchableOpacity>
 
-                    <TouchableOpacity style={styles.logoutButton} onPress={logout}>
+                    <TouchableOpacity 
+                        style={styles.logoutButton} 
+                        activeOpacity={0.7}
+                        onPress={logout}
+                    >
                         <View style={styles.logoutIconBox}>
-                            <LogOut color="#dc2626" size={20} />
+                            <LogOut color="#dc2626" size={20} strokeWidth={2.5} />
                         </View>
                         <Text style={styles.logoutText}>Log Out</Text>
                     </TouchableOpacity>
@@ -197,7 +209,7 @@ export default function ProfileScreen() {
                                 <View style={styles.inputGroup}>
                                     <Text style={styles.label}>Full Name</Text>
                                     <View style={styles.inputContainer}>
-                                        <User color="#94a3b8" size={20} style={styles.inputIcon} />
+                                        <User color="#64748b" size={20} style={styles.inputIcon} />
                                         <TextInput 
                                             style={styles.input} 
                                             value={editName} 
@@ -211,7 +223,7 @@ export default function ProfileScreen() {
                                 <View style={styles.inputGroup}>
                                     <Text style={styles.label}>Email Address</Text>
                                     <View style={styles.inputContainer}>
-                                        <Mail color="#94a3b8" size={20} style={styles.inputIcon} />
+                                        <Mail color="#64748b" size={20} style={styles.inputIcon} />
                                         <TextInput 
                                             style={styles.input} 
                                             value={editEmail} 
@@ -224,8 +236,13 @@ export default function ProfileScreen() {
                                     </View>
                                 </View>
 
-                                <TouchableOpacity style={styles.saveButtonWrapper} onPress={handleSaveProfile} disabled={isLoading}>
-                                    <LinearGradient colors={['#f43f5e', '#fb7185']} style={styles.saveButton}>
+                                <TouchableOpacity 
+                                    style={[styles.saveButtonWrapper, isLoading && styles.buttonDisabled]} 
+                                    onPress={handleSaveProfile} 
+                                    disabled={isLoading}
+                                    activeOpacity={0.8}
+                                >
+                                    <LinearGradient colors={['#1e40af', '#3b82f6']} style={styles.saveButton}>
                                         {isLoading ? <ActivityIndicator color="#ffffff" /> : <Text style={styles.saveButtonText}>Save Changes</Text>}
                                     </LinearGradient>
                                 </TouchableOpacity>
@@ -258,7 +275,7 @@ export default function ProfileScreen() {
                                 <View style={styles.inputGroup}>
                                     <Text style={styles.label}>Current Password</Text>
                                     <View style={styles.inputContainer}>
-                                        <Key color="#94a3b8" size={20} style={styles.inputIcon} />
+                                        <Key color="#64748b" size={20} style={styles.inputIcon} />
                                         <TextInput 
                                             style={styles.input} 
                                             value={currentPassword} 
@@ -273,7 +290,7 @@ export default function ProfileScreen() {
                                 <View style={styles.inputGroup}>
                                     <Text style={styles.label}>New Password</Text>
                                     <View style={styles.inputContainer}>
-                                        <Lock color="#94a3b8" size={20} style={styles.inputIcon} />
+                                        <Lock color="#64748b" size={20} style={styles.inputIcon} />
                                         <TextInput 
                                             style={styles.input} 
                                             value={newPassword} 
@@ -285,8 +302,13 @@ export default function ProfileScreen() {
                                     </View>
                                 </View>
 
-                                <TouchableOpacity style={styles.saveButtonWrapper} onPress={handleSavePassword} disabled={isLoading}>
-                                    <LinearGradient colors={['#f43f5e', '#fb7185']} style={styles.saveButton}>
+                                <TouchableOpacity 
+                                    style={[styles.saveButtonWrapper, isLoading && styles.buttonDisabled]} 
+                                    onPress={handleSavePassword} 
+                                    disabled={isLoading}
+                                    activeOpacity={0.8}
+                                >
+                                    <LinearGradient colors={['#1e40af', '#3b82f6']} style={styles.saveButton}>
                                         {isLoading ? <ActivityIndicator color="#ffffff" /> : <Text style={styles.saveButtonText}>Update Password</Text>}
                                     </LinearGradient>
                                 </TouchableOpacity>
@@ -300,51 +322,346 @@ export default function ProfileScreen() {
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#fafaf9' },
-    header: { paddingBottom: 40, borderBottomLeftRadius: 30, borderBottomRightRadius: 30, overflow: 'hidden' },
-    headerContent: { paddingHorizontal: 20, paddingTop: 20 },
-    circle: { position: 'absolute', backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: 100 },
-    circleTopRight: { width: 120, height: 120, top: -40, right: -40 },
-    circleBottomLeft: { width: 90, height: 90, bottom: -20, left: -20 },
-    userInfoRow: { flexDirection: 'row', alignItems: 'center', gap: 16 },
-    avatarContainer: { width: 80, height: 80, borderRadius: 40, backgroundColor: 'rgba(255,255,255,0.2)', borderWidth: 4, borderColor: 'rgba(255,255,255,0.3)', justifyContent: 'center', alignItems: 'center' },
-    avatarText: { fontSize: 28, fontWeight: '700', color: '#ffffff' },
-    userDetails: { flex: 1 },
-    userName: { fontSize: 24, fontWeight: '700', color: '#ffffff', marginBottom: 4 },
-    userEmail: { fontSize: 14, color: 'rgba(255,255,255,0.9)' },
-    roleBadge: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.2)', paddingHorizontal: 12, paddingVertical: 4, borderRadius: 12 },
-    roleText: { color: '#ffffff', fontSize: 10, fontWeight: '700', letterSpacing: 0.5 },
-    
-    ctaWrapper: { paddingHorizontal: 20, marginTop: -30, zIndex: 10 },
-    ctaCard: { flexDirection: 'row', alignItems: 'center', padding: 20, borderRadius: 20, shadowColor: '#7c3aed', shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.3, shadowRadius: 15, elevation: 8 },
-    ctaIconContainer: { width: 56, height: 56, borderRadius: 16, backgroundColor: 'rgba(255,255,255,0.2)', justifyContent: 'center', alignItems: 'center', marginRight: 16 },
-    ctaTextContainer: { flex: 1 },
-    ctaTitle: { fontSize: 18, fontWeight: '700', color: '#ffffff', marginBottom: 4 },
-    ctaSubtitle: { fontSize: 13, color: 'rgba(255,255,255,0.9)', paddingRight: 10 },
-    
-    menuContainer: { paddingHorizontal: 20, paddingTop: 32 },
-    sectionTitle: { fontSize: 13, fontWeight: '600', color: '#94a3b8', letterSpacing: 1, marginBottom: 12 },
-    menuItem: { flexDirection: 'row', alignItems: 'center', padding: 16, backgroundColor: '#ffffff', borderRadius: 20, marginBottom: 12, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.05, shadowRadius: 10, elevation: 3 },
-    menuIconBox: { width: 40, height: 40, borderRadius: 12, backgroundColor: '#ffe4e6', justifyContent: 'center', alignItems: 'center', marginRight: 12 },
-    menuItemText: { flex: 1, fontSize: 16, fontWeight: '600', color: '#0f172a' },
-    
-    logoutButton: { flexDirection: 'row', alignItems: 'center', padding: 16, backgroundColor: '#ffffff', borderRadius: 20, marginTop: 16, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.05, shadowRadius: 10, elevation: 3 },
-    logoutIconBox: { width: 40, height: 40, borderRadius: 12, backgroundColor: '#fef2f2', justifyContent: 'center', alignItems: 'center', marginRight: 12 },
-    logoutText: { flex: 1, fontSize: 16, fontWeight: '600', color: '#dc2626' },
+    container: { 
+        flex: 1, 
+        backgroundColor: '#f8fafc' 
+    },
 
-    modalOverlay: { flex: 1, backgroundColor: 'rgba(15, 23, 42, 0.5)', justifyContent: 'flex-end' },
-    modalContent: { backgroundColor: '#ffffff', borderTopLeftRadius: 30, borderTopRightRadius: 30, padding: 24, paddingBottom: 40, shadowColor: '#000', shadowOffset: { width: 0, height: -4 }, shadowOpacity: 0.1, shadowRadius: 20, elevation: 10 },
-    modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 },
-    modalTitle: { fontSize: 20, fontWeight: '700', color: '#0f172a' },
-    closeButton: { padding: 4, backgroundColor: '#f1f5f9', borderRadius: 20 },
+    bouncerContainer: { 
+        flex: 1, 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        padding: 24,
+        backgroundColor: '#f8fafc'
+    },
+    bouncerIconBox: { 
+        width: 88, 
+        height: 88, 
+        borderRadius: 44, 
+        backgroundColor: '#dbeafe', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        marginBottom: 24,
+        shadowColor: '#1d4ed8',
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.15,
+        shadowRadius: 16,
+        elevation: 5
+    },
+    bouncerTitle: { 
+        fontSize: 26, 
+        fontWeight: '700', 
+        color: '#0f172a', 
+        marginBottom: 12, 
+        textAlign: 'center',
+        letterSpacing: -0.5
+    },
+    bouncerSubtitle: { 
+        fontSize: 16, 
+        color: '#64748b', 
+        textAlign: 'center', 
+        marginBottom: 40, 
+        paddingHorizontal: 20,
+        lineHeight: 24
+    },
+    bouncerButtonWrapper: { 
+        width: '100%', 
+        maxWidth: 350,
+        borderRadius: 16, 
+        overflow: 'hidden',
+        shadowColor: '#1d4ed8',
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.25,
+        shadowRadius: 16,
+        elevation: 8
+    },
+    bouncerButton: { 
+        height: 60, 
+        justifyContent: 'center', 
+        alignItems: 'center' 
+    },
+    bouncerButtonText: { 
+        color: '#ffffff', 
+        fontSize: 16, 
+        fontWeight: '700',
+        letterSpacing: 0.5 
+    },
+
+    header: { 
+        paddingBottom: 48, 
+        borderBottomLeftRadius: 32, 
+        borderBottomRightRadius: 32, 
+        overflow: 'hidden' 
+    },
+    headerContent: { 
+        paddingHorizontal: 24, 
+        paddingTop: Platform.OS === 'android' ? 40 : 20 
+    },
+    circle: { 
+        position: 'absolute', 
+        backgroundColor: 'rgba(255,255,255,0.03)', 
+        borderRadius: 999 
+    },
+    circleTopRight: { width: 200, height: 200, top: -60, right: -60 },
+    circleBottomLeft: { width: 140, height: 140, bottom: -40, left: -40 },
+    userInfoRow: { 
+        flexDirection: 'row', 
+        alignItems: 'center', 
+        gap: 20 
+    },
+    avatarContainer: { 
+        width: 88, 
+        height: 88, 
+        borderRadius: 44, 
+        backgroundColor: 'rgba(255,255,255,0.1)', 
+        borderWidth: 2, 
+        borderColor: 'rgba(255,255,255,0.2)', 
+        justifyContent: 'center', 
+        alignItems: 'center' 
+    },
+    avatarText: { 
+        fontSize: 32, 
+        fontWeight: '700', 
+        color: '#ffffff',
+        letterSpacing: 1 
+    },
+    userDetails: { 
+        flex: 1 
+    },
+    userName: { 
+        fontSize: 26, 
+        fontWeight: '800', 
+        color: '#ffffff', 
+        marginBottom: 4,
+        letterSpacing: -0.3 
+    },
+    userEmail: { 
+        fontSize: 15, 
+        fontWeight: '500',
+        color: 'rgba(255,255,255,0.8)' 
+    },
+    roleBadge: { 
+        flexDirection: 'row', 
+        alignItems: 'center', 
+        backgroundColor: 'rgba(255,255,255,0.15)', 
+        paddingHorizontal: 12, 
+        paddingVertical: 6, 
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: 'rgba(255,255,255,0.1)'
+    },
+    roleText: { 
+        color: '#ffffff', 
+        fontSize: 11, 
+        fontWeight: '700', 
+        letterSpacing: 0.8 
+    },
     
-    inputGroup: { marginBottom: 20 },
-    label: { fontSize: 14, fontWeight: '600', color: '#475569', marginBottom: 8, marginLeft: 4 },
-    inputContainer: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#f8fafc', borderWidth: 1, borderColor: '#e2e8f0', borderRadius: 16, height: 56, paddingHorizontal: 16 },
-    inputIcon: { marginRight: 12 },
-    input: { flex: 1, fontSize: 16, color: '#0f172a' },
+    ctaWrapper: { 
+        paddingHorizontal: 24, 
+        marginTop: -32, 
+        zIndex: 10 
+    },
+    ctaCard: { 
+        flexDirection: 'row', 
+        alignItems: 'center', 
+        padding: 24, 
+        borderRadius: 24, 
+        shadowColor: '#5e253cff', 
+        shadowOffset: { width: 0, height: 12 }, 
+        shadowOpacity: 0.3, 
+        shadowRadius: 20, 
+        elevation: 8 
+    },
+    ctaIconContainer: { 
+        width: 60, 
+        height: 60, 
+        borderRadius: 20, 
+        backgroundColor: 'rgba(255,255,255,0.15)', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        marginRight: 16 
+    },
+    ctaTextContainer: { 
+        flex: 1 
+    },
+    ctaTitle: { 
+        fontSize: 18, 
+        fontWeight: '700', 
+        color: '#ffffff', 
+        marginBottom: 4,
+        letterSpacing: 0.2
+    },
+    ctaSubtitle: { 
+        fontSize: 14, 
+        color: 'rgba(255,255,255,0.85)', 
+        paddingRight: 10,
+        fontWeight: '500',
+        lineHeight: 20
+    },
     
-    saveButtonWrapper: { width: '100%', borderRadius: 16, overflow: 'hidden', marginTop: 10 },
-    saveButton: { height: 56, justifyContent: 'center', alignItems: 'center' },
-    saveButtonText: { color: '#ffffff', fontSize: 16, fontWeight: '700' }
+    menuContainer: { 
+        paddingHorizontal: 24, 
+        paddingTop: 32 
+    },
+    sectionTitle: { 
+        fontSize: 13, 
+        fontWeight: '700', 
+        color: '#94a3b8', 
+        letterSpacing: 1.2, 
+        marginBottom: 16 
+    },
+    menuItem: { 
+        flexDirection: 'row', 
+        alignItems: 'center', 
+        padding: 16, 
+        backgroundColor: '#ffffff', 
+        borderRadius: 20, 
+        marginBottom: 12, 
+        shadowColor: '#000', 
+        shadowOffset: { width: 0, height: 4 }, 
+        shadowOpacity: 0.04, 
+        shadowRadius: 12, 
+        elevation: 2,
+        borderWidth: 1,
+        borderColor: '#f1f5f9'
+    },
+    menuIconBox: { 
+        width: 44, 
+        height: 44, 
+        borderRadius: 14, 
+        backgroundColor: '#eff6ff', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        marginRight: 16 
+    },
+    menuItemText: { 
+        flex: 1, 
+        fontSize: 16, 
+        fontWeight: '700', 
+        color: '#0f172a' 
+    },
+    
+    logoutButton: { 
+        flexDirection: 'row', 
+        alignItems: 'center', 
+        padding: 16, 
+        backgroundColor: '#ffffff', 
+        borderRadius: 20, 
+        marginTop: 16, 
+        shadowColor: '#000', 
+        shadowOffset: { width: 0, height: 4 }, 
+        shadowOpacity: 0.04, 
+        shadowRadius: 12, 
+        elevation: 2,
+        borderWidth: 1,
+        borderColor: '#f1f5f9'
+    },
+    logoutIconBox: { 
+        width: 44, 
+        height: 44, 
+        borderRadius: 14, 
+        backgroundColor: '#fef2f2', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        marginRight: 16 
+    },
+    logoutText: { 
+        flex: 1, 
+        fontSize: 16, 
+        fontWeight: '700', 
+        color: '#dc2626' 
+    },
+
+    modalOverlay: { 
+        flex: 1, 
+        backgroundColor: 'rgba(15, 23, 42, 0.6)',
+        justifyContent: 'flex-end' 
+    },
+    modalContent: { 
+        backgroundColor: '#ffffff', 
+        borderTopLeftRadius: 32, 
+        borderTopRightRadius: 32, 
+        padding: 24, 
+        paddingBottom: Platform.OS === 'ios' ? 40 : 24, 
+        shadowColor: '#000', 
+        shadowOffset: { width: 0, height: -8 }, 
+        shadowOpacity: 0.15, 
+        shadowRadius: 24, 
+        elevation: 20 
+    },
+    modalHeader: { 
+        flexDirection: 'row', 
+        justifyContent: 'space-between', 
+        alignItems: 'center', 
+        marginBottom: 32 
+    },
+    modalTitle: { 
+        fontSize: 22, 
+        fontWeight: '700', 
+        color: '#0f172a',
+        letterSpacing: -0.3
+    },
+    closeButton: { 
+        padding: 8, 
+        backgroundColor: '#f1f5f9', 
+        borderRadius: 20 
+    },
+    
+    inputGroup: { 
+        marginBottom: 24 
+    },
+    label: { 
+        fontSize: 14, 
+        fontWeight: '700', 
+        color: '#475569', 
+        marginBottom: 8, 
+        marginLeft: 4 
+    },
+    inputContainer: { 
+        flexDirection: 'row', 
+        alignItems: 'center', 
+        backgroundColor: '#f8fafc', 
+        borderWidth: 1.5, 
+        borderColor: '#e2e8f0', 
+        borderRadius: 16, 
+        height: 60, 
+        paddingHorizontal: 16 
+    },
+    inputIcon: { 
+        marginRight: 12 
+    },
+    input: { 
+        flex: 1, 
+        fontSize: 16, 
+        color: '#0f172a',
+        fontWeight: '500'
+    },
+    
+    saveButtonWrapper: { 
+        width: '100%', 
+        borderRadius: 16, 
+        overflow: 'hidden', 
+        marginTop: 16,
+        shadowColor: '#1d4ed8',
+        shadowOffset: { width: 0, height: 6 },
+        shadowOpacity: 0.3,
+        shadowRadius: 16,
+        elevation: 6
+    },
+    buttonDisabled: {
+        opacity: 0.7,
+        shadowOpacity: 0
+    },
+    saveButton: { 
+        height: 60, 
+        justifyContent: 'center', 
+        alignItems: 'center' 
+    },
+    saveButtonText: { 
+        color: '#ffffff', 
+        fontSize: 17, 
+        fontWeight: '700',
+        letterSpacing: 0.3 
+    }
 });

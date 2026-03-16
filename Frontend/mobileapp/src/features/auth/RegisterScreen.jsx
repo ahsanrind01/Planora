@@ -56,14 +56,20 @@ export default function RegisterScreen() {
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
             style={{ flex: 1 }}
         >
-            <LinearGradient colors={['#fffbeb', '#fff1f2', '#f3e8ff']} style={styles.container}>
-                <ScrollView contentContainerStyle={styles.scrollContent}>
+            <LinearGradient colors={['#0f172a', '#1e3a8a']} style={styles.container}>
+                
+                <View style={[styles.circle, styles.circleTopRight]} />
+                <View style={[styles.circle, styles.circleBottomLeft]} />
+
+                <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+                    
+
                     <View style={styles.card}>
 
                         <View style={styles.header}>
                             <View style={styles.iconContainer}>
-                                <LinearGradient colors={['#fb7185', '#a855f7']} style={styles.iconBackground}>
-                                    <UserPlus size={32} color="#ffffff" />
+                                <LinearGradient colors={['#1e40af', '#3b82f6']} style={styles.iconBackground}>
+                                    <UserPlus size={28} color="#ffffff" strokeWidth={2.5} />
                                 </LinearGradient>
                             </View>
                             <Text style={styles.title}>Create Account</Text>
@@ -71,30 +77,32 @@ export default function RegisterScreen() {
                         </View>
 
                         <View style={styles.form}>
-                            <Input
-                                label="Full Name"
-                                placeholder="John Doe"
-                                autoCapitalize="words"
-                                value={name}
-                                onChangeText={setName}
-                            />
+                            <View style={styles.inputGroup}>
+                                <Input
+                                    label="Full Name"
+                                    placeholder="John Doe"
+                                    autoCapitalize="words"
+                                    value={name}
+                                    onChangeText={setName}
+                                />
 
-                            <Input
-                                label="Email"
-                                placeholder="name@example.com"
-                                keyboardType="email-address"
-                                autoCapitalize="none"
-                                value={email}
-                                onChangeText={setEmail}
-                            />
+                                <Input
+                                    label="Email"
+                                    placeholder="name@example.com"
+                                    keyboardType="email-address"
+                                    autoCapitalize="none"
+                                    value={email}
+                                    onChangeText={setEmail}
+                                />
 
-                            <Input
-                                label="Password"
-                                placeholder="••••••••"
-                                secureTextEntry
-                                value={password}
-                                onChangeText={setPassword}
-                            />
+                                <Input
+                                    label="Password"
+                                    placeholder="••••••••"
+                                    secureTextEntry
+                                    value={password}
+                                    onChangeText={setPassword}
+                                />
+                            </View>
 
                             <Button
                                 title="Sign Up"
@@ -104,7 +112,10 @@ export default function RegisterScreen() {
 
                             <View style={styles.footer}>
                                 <Text style={styles.footerText}>Already have an account? </Text>
-                                <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+                                <TouchableOpacity 
+                                    activeOpacity={0.7} 
+                                    onPress={() => navigation.navigate('Login')}
+                                >
                                     <Text style={styles.signupText}>Log in</Text>
                                 </TouchableOpacity>
                             </View>
@@ -118,60 +129,110 @@ export default function RegisterScreen() {
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1 },
+    container: { 
+        flex: 1 
+    },
+    
+    circle: { 
+        position: 'absolute', 
+        backgroundColor: 'rgba(255,255,255,0.04)', 
+        borderRadius: 999 
+    },
+    circleTopRight: { 
+        width: 300, 
+        height: 300, 
+        top: -100, 
+        right: -100 
+    },
+    circleBottomLeft: { 
+        width: 200, 
+        height: 200, 
+        bottom: -50, 
+        left: -80 
+    },
+
     scrollContent: {
         flexGrow: 1,
         justifyContent: 'center',
-        padding: 16
+        padding: 24 
     },
+
     card: {
         backgroundColor: '#ffffff',
-        borderRadius: 16,
-        padding: 24,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 10 },
-        shadowOpacity: 0.1,
-        shadowRadius: 15,
-        elevation: 5,
+        borderRadius: 32, 
+        padding: 32,
         width: '100%',
         maxWidth: 450,
         alignSelf: 'center',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 16 },
+        shadowOpacity: 0.15,
+        shadowRadius: 32,
+        elevation: 10,
+        borderWidth: 1,
+        borderColor: 'rgba(255,255,255,0.8)'
     },
+
     header: {
         alignItems: 'center',
-        marginBottom: 24
+        marginBottom: 32
     },
-    iconContainer: { marginBottom: 16 },
+
+    iconContainer: { 
+        marginBottom: 20,
+        shadowColor: '#1d4ed8',
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.25,
+        shadowRadius: 16,
+        elevation: 8
+    },
+
     iconBackground: {
-        padding: 12,
-        borderRadius: 50,
+        padding: 16,
+        borderRadius: 24, 
         justifyContent: 'center',
         alignItems: 'center'
     },
+
     title: {
-        fontSize: 24,
-        fontWeight: '700',
+        fontSize: 28,
+        fontWeight: '800',
         color: '#0f172a',
+        marginBottom: 8,
+        letterSpacing: -0.5 
+    },
+
+    description: {
+        fontSize: 15,
+        color: '#64748b',
+        textAlign: 'center',
+        fontWeight: '500'
+    },
+
+    form: { 
+        gap: 20 
+    },
+
+    inputGroup: {
+        gap: 16, 
         marginBottom: 8
     },
-    description: {
-        fontSize: 14,
-        color: '#64748b',
-        textAlign: 'center'
-    },
-    form: { gap: 16 },
+
     footer: {
         flexDirection: 'row',
         justifyContent: 'center',
-        marginTop: 24
+        marginTop: 28
     },
+
     footerText: {
-        fontSize: 14,
-        color: '#475569'
+        fontSize: 15,
+        color: '#64748b',
+        fontWeight: '500'
     },
+
     signupText: {
-        fontSize: 14,
-        fontWeight: '600',
-        color: '#f43f5e'
+        fontSize: 15,
+        fontWeight: '700',
+        color: '#2563eb' 
     }
 });
