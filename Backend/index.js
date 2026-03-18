@@ -3,6 +3,7 @@ dotenv.config();
 
 import { fileURLToPath } from 'url';
 import path from 'path';
+import cors from 'cors'; 
 
 import express from 'express'
 import connectToMongoDB from './src/config/database.js'
@@ -23,10 +24,12 @@ import eventBus from './src/utils/eventBus.js';
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
-connectToMongoDB();
-console.log("connected to the database");
+// Connect to the database
+connectToMongoDB(); 
 
 const app = express();
+
+app.use(cors()); 
 app.use(express.json())
 
 // Setup normal routes
@@ -39,7 +42,7 @@ app.use('/api/bookings', bookingRoutes)
 app.use('/api/schedule', scheduleRoutes)
 app.use('/api/reviews', reviewRoutes)
 
-
-app.listen(3000, () => {
-    console.log('Server running on port 3000');
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
 });

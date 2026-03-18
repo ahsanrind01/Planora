@@ -1,14 +1,17 @@
 import Business from "../models/business.js";
 import User from "../models/user.js";
-import path from 'path';
 
 export const createBusiness = async (req, res) => {
-
     try {
+        // 🚨 THE DEBUGGER: This will print exactly what the server sees
+        console.log("\n====== NEW BUSINESS REGISTRATION ======");
+        console.log("1. Text Fields Received:", req.body.name ? "Yes" : "No");
+        console.log("2. Files Received by Multer:", req.files ? Object.keys(req.files) : "None");
+        
         const { name, description, category, address, phone, city } = req.body;
 
         if (!name || !description || !category || !address || !phone || !city) {
-            return res.status(400).json({ message: 'please fill the given fields' })
+            return res.status(400).json({ message: 'please fill the given fields' });
         }
 
         const existingBusiness = await Business.findOne({ owner: req.user._id });
@@ -16,17 +19,25 @@ export const createBusiness = async (req, res) => {
             return res.status(400).json({ message: 'You already own a business' });
         }
 
-        let coverImage= "";
+        let coverImage = "";
         let images = [];
 
-        if(req.files){
-            if(req.files.coverImage){
-                coverImage=req.files.coverImage.path;
+        if (req.files) {
+            // Check for cover image
+            if (req.files.coverImage && req.files.coverImage.length > 0) {
+                coverImage = req.files.coverImage[0].path; 
+                console.log("3. ✅ Cover Image extracted:", coverImage);
+            } else {
+                console.log("3. ❌ WARNING: Multer did not find a file named 'coverImage'");
             }
-            if(req.files.images){
-                images=req.files.images.map(file=> file.path)
+
+            // Check for gallery images
+            if (req.files.images) {
+                images = req.files.images.map(file => file.path);
+                console.log(`4. ✅ ${images.length} Gallery Images extracted`);
             }
         }
+        console.log("=======================================\n");
 
         const newBusiness = await Business.create({
             name: name,
@@ -35,23 +46,25 @@ export const createBusiness = async (req, res) => {
             city: city,
             address: address,
             phone: phone,
-            coverImage: coverImage,
+            coverImage: coverImage, // Will save as "" if missing, ensuring the key exists!
             images: images ,
             owner: req.user._id,
-        })
+        });
 
         await User.findByIdAndUpdate(req.user._id, {
             role: 'manager',
             businessId: newBusiness._id
         });
+
         res.status(201).json({
             success: true,
             data: newBusiness
         });
     } catch (error) {
+        console.log("🚨 CREATION ERROR:", error.message);
         res.status(400).json({
             message: error.message
-        })
+        });
     }
 }
 

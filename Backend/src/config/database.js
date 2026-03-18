@@ -1,11 +1,14 @@
 import mongoose from "mongoose";
- async function connectToMongoDB(){
+
+async function connectToMongoDB(){
     try {
-           await mongoose.connect('mongodb://localhost:27017/Planora');
+        const conn = await mongoose.connect(process.env.MONGO_URI);
+        
+        console.log(`✅ Connected to MongoDB: ${conn.connection.host}`);
    
     } catch (error) {
-        console.error("error connecting to the database ",error);
+        console.error("❌ Error connecting to the database ", error);
     }
 }
 
-export default connectToMongoDB
+export default connectToMongoDB;

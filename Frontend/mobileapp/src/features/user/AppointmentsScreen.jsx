@@ -397,7 +397,7 @@ const styles = StyleSheet.create({
     },
     providerName: { 
         fontSize: 19, 
-        fontWeight: '00', 
+        fontWeight: '700', 
         color: '#0f172a', 
         marginBottom: 6,
         letterSpacing: -0.3 
