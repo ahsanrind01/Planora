@@ -33,7 +33,11 @@ const bookingSchema = new mongoose.Schema({
     type: String,
     enum: ['unpaid', 'paid', 'refunded'],
     default: 'unpaid'
-  }
+  },
+  stripePaymentId: {
+        type: String,
+        default: null
+    },
 }, { timestamps: true });
 
 export default mongoose.model('Booking', bookingSchema);

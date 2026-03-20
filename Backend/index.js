@@ -16,6 +16,7 @@ import serviceRoutes from './src/routes/service.js'
 import bookingRoutes from './src/routes/booking.js';
 import scheduleRoutes from './src/routes/schedule.js';
 import reviewRoutes from './src/routes/review.js';
+import paymentRoutes from './src/routes/payment.js';
 
 // Subscribers & Events
 import './src/subscribers/bookingSubscriber.js';
@@ -41,6 +42,7 @@ app.use('/api/services', serviceRoutes)
 app.use('/api/bookings', bookingRoutes)
 app.use('/api/schedule', scheduleRoutes)
 app.use('/api/reviews', reviewRoutes)
+app.use('/api/payments', paymentRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

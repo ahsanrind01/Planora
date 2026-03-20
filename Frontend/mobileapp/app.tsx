@@ -1,8 +1,11 @@
 import React from 'react';
-import {useEffect } from 'react';
+import { useEffect } from 'react';
 import { apiClient } from './src/core/api/apiClient';
 import AppNavigator from './src/navigation/AppNavigator';
 import { usePushNotifications } from './src/hooks/usePushNotifications';
+
+import { StripeProvider } from '@stripe/stripe-react-native';
+import { STRIPE_PUBLISHABLE_KEY } from './src/core/config';
 
 export default function App() {
   const pushToken = usePushNotifications();
@@ -23,6 +26,9 @@ export default function App() {
         
     }, [pushToken]);
 
-  return <AppNavigator />;
+  return (
+    <StripeProvider publishableKey={STRIPE_PUBLISHABLE_KEY}>
+        <AppNavigator />
+    </StripeProvider>
+  );
 }
-

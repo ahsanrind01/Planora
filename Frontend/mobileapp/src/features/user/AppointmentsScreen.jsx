@@ -77,6 +77,19 @@ export default function AppointmentsScreen() {
         }
     };
 
+    const getPaymentBadgeStyle = (status) => {
+    switch (status) {
+        case 'paid':
+            return { backgroundColor: '#dcfce7', color: '#166534' }; 
+        case 'unpaid':
+            return { backgroundColor: '#fef9c3', color: '#854d0e' }; 
+        case 'refunded':
+            return { backgroundColor: '#f1f5f9', color: '#475569' }; 
+        default:
+            return { backgroundColor: '#f1f5f9', color: '#475569' };
+    }
+};
+
     if (!user) {
         return (
             <View style={styles.bouncerContainer}>
@@ -166,10 +179,24 @@ export default function AppointmentsScreen() {
                                             <Text style={styles.providerName}>{businessName}</Text>
                                             <Text style={styles.serviceName}>{serviceName}</Text>
                                         </View>
-                                        <View style={[styles.statusBadge, { backgroundColor: statusStyle.bg }]}>
-                                            <Text style={[styles.statusText, { color: statusStyle.text }]}>
-                                                {appointment.status || "Pending"}
-                                            </Text>
+                                        <View style={styles.badgeRow}>
+                                            <View style={[styles.statusBadge, { backgroundColor: statusStyle.bg }]}>
+                                                <Text style={[styles.statusText, { color: statusStyle.text }]}>
+                                                    {appointment.status || "Pending"}
+                                                </Text>
+                                            </View>
+
+                                            <View style={[
+                                                styles.statusBadge, 
+                                                { backgroundColor: getPaymentBadgeStyle(appointment.paymentStatus).backgroundColor, marginLeft: 8 }
+                                            ]}>
+                                                <Text style={[
+                                                    styles.statusText, 
+                                                    { color: getPaymentBadgeStyle(appointment.paymentStatus).color }
+                                                ]}>
+                                                    {appointment.paymentStatus ? appointment.paymentStatus.toUpperCase() : 'UNPAID'}
+                                                </Text>
+                                            </View>
                                         </View>
                                     </View>
 
@@ -462,5 +489,23 @@ const styles = StyleSheet.create({
         color: '#e11d48', 
         fontSize: 15, 
         fontWeight: '700' 
-    }
+    },
+    badgeRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginTop: 8,
+        marginBottom: 12,
+    },
+    badge: {
+        paddingVertical: 4,
+        paddingHorizontal: 10,
+        borderRadius: 12,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    badgeText: {
+        fontSize: 12,
+        fontWeight: 'bold',
+        letterSpacing: 0.5,
+    },
 });

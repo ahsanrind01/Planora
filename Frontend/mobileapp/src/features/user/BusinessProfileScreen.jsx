@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { BASE_URL } from '@/src/core/config';
 import {
     View,
     Text,
@@ -16,7 +17,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { ArrowLeft, MapPin, Star, X, Phone, BadgeCheck } from 'lucide-react-native';
 
 // Stores
-import { useAuthStore } from '../../core/store/authStore'; 
+import { useAuthStore } from '../../core/store/authStore';
 import { useBusinessStore } from '../../core/store/businessStore';
 import { useServiceStore } from '../../core/store/serviceStore';
 import { useAppointmentStore } from '../../core/store/appointmentStore';
@@ -39,7 +40,7 @@ const baseUpcomingDates = getNext7Days();
 export default function BusinessProfileScreen() {
     const route = useRoute();
     const navigation = useNavigation();
-    
+
     const user = useAuthStore(state => state.user);
 
     const { providerId } = route.params;
@@ -130,7 +131,7 @@ export default function BusinessProfileScreen() {
 
     const timeSlots = generateTimeSlots();
 
-    const handleConfirmBooking = async () => {
+const handleConfirmBooking = async () => {
         const targetId = selectedService?._id || selectedService?.id;
 
         if (!targetId) {
@@ -138,31 +139,33 @@ export default function BusinessProfileScreen() {
             return;
         }
 
+        setBookingModalOpen(false);
+
         const d = new Date(selectedDate);
         const year = d.getFullYear();
         const month = String(d.getMonth() + 1).padStart(2, '0');
         const day = String(d.getDate()).padStart(2, '0');
-
         const finalDateString = `${year}-${month}-${day}T${selectedTime}:00`;
 
-        const result = await submitBooking(targetId, finalDateString, selectedTime);
-
-        if (result.success) {
-            setBookingModalOpen(false);
-            setSelectedTime("");
-            navigation.navigate('Bookings');
-        } else {
-            alert(result.message || "Failed to book appointment.");
-        }
+        navigation.navigate('Checkout', {
+            serviceId: targetId,               
+            providerId: providerId,           
+            businessName: business?.name || "Planora Business",
+            serviceName: selectedService?.name || "Service",
+            price: selectedService?.price || 0,
+            selectedTime: `${d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })} at ${selectedTime}`,
+            finalDateString: finalDateString   
+        });
+        
+        setSelectedTime("");
     };
 
     const getImageUrl = (imagePath) => {
         if (!imagePath) return "https://images.unsplash.com/photo-1600948836101-f9ffda59d250?w=800&q=80";
         if (imagePath.startsWith('http')) return imagePath;
 
-        const BASE_URL = 'http://192.168.18.125:3000/';
         const cleanPath = imagePath.replace(/\\/g, '/');
-        return `${BASE_URL}${cleanPath}`;
+        return `${BASE_URL}/${cleanPath}`;
     };
 
     return (
@@ -182,7 +185,7 @@ export default function BusinessProfileScreen() {
                         colors={['transparent', 'rgba(248,250,252,0.8)', '#f8fafc']}
                         style={styles.heroGradientBottom}
                     />
-                    
+
                     <SafeAreaView style={styles.safeArea}>
                         <TouchableOpacity
                             style={styles.backButton}
@@ -250,7 +253,7 @@ export default function BusinessProfileScreen() {
                                         />
                                     </TouchableOpacity>
                                 ))}
-                                <View style={{ width: 24 }} /> 
+                                <View style={{ width: 24 }} />
                             </ScrollView>
                         </View>
                     )}
@@ -272,7 +275,7 @@ export default function BusinessProfileScreen() {
                                         </Text>
                                     </View>
 
-                                    <TouchableOpacity 
+                                    <TouchableOpacity
                                         onPress={() => handleBookClick(service)}
                                         activeOpacity={0.8}
                                     >
@@ -457,167 +460,167 @@ export default function BusinessProfileScreen() {
 }
 
 const styles = StyleSheet.create({
-    container: { 
-        flex: 1, 
-        backgroundColor: '#f8fafc' 
+    container: {
+        flex: 1,
+        backgroundColor: '#f8fafc'
     },
-    
-    heroContainer: { 
-        position: 'relative', 
-        height: 320, 
+
+    heroContainer: {
+        position: 'relative',
+        height: 320,
         backgroundColor: '#0f172a'
     },
-    heroImage: { 
-        width: '100%', 
-        height: '100%', 
+    heroImage: {
+        width: '100%',
+        height: '100%',
         resizeMode: 'cover',
         opacity: 0.85
     },
-    heroGradientTop: { 
-        position: 'absolute', top: 0, left: 0, right: 0, height: 140 
+    heroGradientTop: {
+        position: 'absolute', top: 0, left: 0, right: 0, height: 140
     },
-    heroGradientBottom: { 
-        position: 'absolute', bottom: 0, left: 0, right: 0, height: 120 
+    heroGradientBottom: {
+        position: 'absolute', bottom: 0, left: 0, right: 0, height: 120
     },
-    safeArea: { 
-        position: 'absolute', top: 0, left: 0, right: 0 
+    safeArea: {
+        position: 'absolute', top: 0, left: 0, right: 0
     },
-    backButton: { 
-        width: 48, 
-        height: 48, 
-        backgroundColor: 'rgba(255, 255, 255, 0.85)', 
-        borderRadius: 24, 
-        justifyContent: 'center', 
-        alignItems: 'center', 
-        marginLeft: 24, 
-        marginTop: Platform.OS === 'android' ? 40 : 10, 
-        shadowColor: '#000', 
-        shadowOffset: { width: 0, height: 4 }, 
-        shadowOpacity: 0.15, 
-        shadowRadius: 12, 
-        elevation: 5 
+    backButton: {
+        width: 48,
+        height: 48,
+        backgroundColor: 'rgba(255, 255, 255, 0.85)',
+        borderRadius: 24,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginLeft: 24,
+        marginTop: Platform.OS === 'android' ? 40 : 10,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.15,
+        shadowRadius: 12,
+        elevation: 5
     },
 
     contentWrapper: {
-        marginTop: -40, 
+        marginTop: -40,
         zIndex: 10
     },
-    headerInfoCard: { 
+    headerInfoCard: {
         backgroundColor: '#ffffff',
         marginHorizontal: 24,
         padding: 24,
         borderRadius: 24,
-        shadowColor: '#0f172a', 
-        shadowOffset: { width: 0, height: 8 }, 
-        shadowOpacity: 0.08, 
-        shadowRadius: 24, 
+        shadowColor: '#0f172a',
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.08,
+        shadowRadius: 24,
         elevation: 8,
         marginBottom: 24
     },
-    titleRow: { 
-        flexDirection: 'row', 
-        alignItems: 'center', 
-        gap: 8, 
-        marginBottom: 12 
+    titleRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+        marginBottom: 12
     },
-    businessName: { 
-        fontSize: 26, 
-        fontWeight: '700', 
+    businessName: {
+        fontSize: 26,
+        fontWeight: '700',
         color: '#0f172a',
         letterSpacing: -0.5,
         flex: 1
     },
-    statsRow: { 
-        flexDirection: 'row', 
-        alignItems: 'center', 
-        marginBottom: 20 
+    statsRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 20
     },
-    statPill: { 
-        flexDirection: 'row', 
-        alignItems: 'center', 
+    statPill: {
+        flexDirection: 'row',
+        alignItems: 'center',
         gap: 6,
-        backgroundColor: '#fef3c7', 
+        backgroundColor: '#fef3c7',
         paddingHorizontal: 10,
         paddingVertical: 4,
         borderRadius: 8
     },
-    statText: { 
-        fontSize: 14, 
-        color: '#b45309', 
-        fontWeight: '700' 
+    statText: {
+        fontSize: 14,
+        color: '#b45309',
+        fontWeight: '700'
     },
     infoRow: {
-        flexDirection: 'row', 
-        alignItems: 'flex-start', 
+        flexDirection: 'row',
+        alignItems: 'flex-start',
         gap: 12,
         marginTop: 12
     },
-    infoText: { 
-        fontSize: 15, 
+    infoText: {
+        fontSize: 15,
         color: '#475569',
         fontWeight: '500',
         flex: 1,
         lineHeight: 22
     },
 
-    sectionContainer: { 
+    sectionContainer: {
         paddingHorizontal: 24,
         marginBottom: 32
     },
-    sectionTitle: { 
-        fontSize: 22, 
-        fontWeight: '700', 
-        color: '#0f172a', 
+    sectionTitle: {
+        fontSize: 22,
+        fontWeight: '700',
+        color: '#0f172a',
         marginBottom: 16,
         letterSpacing: -0.3
     },
-    descriptionText: { 
-        fontSize: 16, 
-        color: '#475569', 
+    descriptionText: {
+        fontSize: 16,
+        color: '#475569',
         lineHeight: 26,
         fontWeight: '400'
     },
 
-    galleryScroll: { 
-        marginHorizontal: -24, 
-        paddingHorizontal: 24 
+    galleryScroll: {
+        marginHorizontal: -24,
+        paddingHorizontal: 24
     },
-    galleryImage: { 
-        width: 160, 
-        height: 160, 
+    galleryImage: {
+        width: 160,
+        height: 160,
         borderRadius: 20,
-        marginRight: 16, 
-        resizeMode: 'cover' 
+        marginRight: 16,
+        resizeMode: 'cover'
     },
 
-    serviceCard: { 
-        flexDirection: 'row', 
-        justifyContent: 'space-between', 
-        alignItems: 'center', 
-        padding: 20, 
-        backgroundColor: '#ffffff', 
-        borderRadius: 20, 
-        marginBottom: 16, 
-        shadowColor: '#0f172a', 
-        shadowOffset: { width: 0, height: 4 }, 
-        shadowOpacity: 0.05, 
-        shadowRadius: 12, 
-        elevation: 3, 
-        borderWidth: 1, 
-        borderColor: '#f1f5f9' 
+    serviceCard: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        padding: 20,
+        backgroundColor: '#ffffff',
+        borderRadius: 20,
+        marginBottom: 16,
+        shadowColor: '#0f172a',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.05,
+        shadowRadius: 12,
+        elevation: 3,
+        borderWidth: 1,
+        borderColor: '#f1f5f9'
     },
-    serviceInfo: { 
+    serviceInfo: {
         flex: 1,
         paddingRight: 16
     },
-    serviceName: { 
-        fontSize: 17, 
-        fontWeight: '700', 
-        color: '#0f172a', 
-        marginBottom: 6 
+    serviceName: {
+        fontSize: 17,
+        fontWeight: '700',
+        color: '#0f172a',
+        marginBottom: 6
     },
-    serviceDetails: { 
-        fontSize: 14, 
+    serviceDetails: {
+        fontSize: 14,
         color: '#64748b',
         fontWeight: '500'
     },
@@ -625,9 +628,9 @@ const styles = StyleSheet.create({
         color: '#1d4ed8',
         fontWeight: '700'
     },
-    bookButton: { 
-        paddingHorizontal: 24, 
-        paddingVertical: 12, 
+    bookButton: {
+        paddingHorizontal: 24,
+        paddingVertical: 12,
         borderRadius: 16,
         shadowColor: '#1d4ed8',
         shadowOffset: { width: 0, height: 4 },
@@ -635,19 +638,19 @@ const styles = StyleSheet.create({
         shadowRadius: 8,
         elevation: 4
     },
-    bookButtonText: { 
-        color: '#ffffff', 
-        fontWeight: '700', 
+    bookButtonText: {
+        color: '#ffffff',
+        fontWeight: '700',
         fontSize: 15,
         letterSpacing: 0.3
     },
 
-    reviewCard: { 
-        backgroundColor: '#ffffff', 
-        padding: 20, 
-        borderRadius: 20, 
-        marginBottom: 16, 
-        borderWidth: 1, 
+    reviewCard: {
+        backgroundColor: '#ffffff',
+        padding: 20,
+        borderRadius: 20,
+        marginBottom: 16,
+        borderWidth: 1,
         borderColor: '#e2e8f0',
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
@@ -655,117 +658,117 @@ const styles = StyleSheet.create({
         shadowRadius: 8,
         elevation: 1
     },
-    reviewHeader: { 
-        flexDirection: 'row', 
-        justifyContent: 'space-between', 
-        alignItems: 'center', 
-        marginBottom: 12 
+    reviewHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 12
     },
-    reviewAuthor: { 
-        flexDirection: 'row', 
-        alignItems: 'center', 
-        gap: 12 
+    reviewAuthor: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 12
     },
-    avatar: { 
-        width: 38, 
-        height: 38, 
-        backgroundColor: '#dbeafe', 
-        borderRadius: 12, 
-        justifyContent: 'center', 
-        alignItems: 'center' 
+    avatar: {
+        width: 38,
+        height: 38,
+        backgroundColor: '#dbeafe',
+        borderRadius: 12,
+        justifyContent: 'center',
+        alignItems: 'center'
     },
-    avatarText: { 
-        fontSize: 16, 
-        fontWeight: '800', 
-        color: '#1e40af' 
+    avatarText: {
+        fontSize: 16,
+        fontWeight: '800',
+        color: '#1e40af'
     },
-    reviewName: { 
-        fontSize: 16, 
-        fontWeight: '700', 
-        color: '#0f172a' 
+    reviewName: {
+        fontSize: 16,
+        fontWeight: '700',
+        color: '#0f172a'
     },
-    reviewStars: { 
-        flexDirection: 'row', 
-        alignItems: 'center', 
-        gap: 6, 
-        backgroundColor: '#f8fafc', 
-        paddingHorizontal: 10, 
-        paddingVertical: 6, 
+    reviewStars: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 6,
+        backgroundColor: '#f8fafc',
+        paddingHorizontal: 10,
+        paddingVertical: 6,
         borderRadius: 10,
         borderWidth: 1,
         borderColor: '#f1f5f9'
     },
-    reviewRatingText: { 
-        fontSize: 14, 
-        fontWeight: '700', 
-        color: '#0f172a' 
+    reviewRatingText: {
+        fontSize: 14,
+        fontWeight: '700',
+        color: '#0f172a'
     },
-    reviewComment: { 
-        fontSize: 15, 
-        color: '#475569', 
+    reviewComment: {
+        fontSize: 15,
+        color: '#475569',
         lineHeight: 24,
         fontWeight: '400'
     },
 
-    modalOverlay: { 
-        flex: 1, 
-        backgroundColor: 'rgba(15, 23, 42, 0.6)', 
-        justifyContent: 'flex-end' 
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(15, 23, 42, 0.6)',
+        justifyContent: 'flex-end'
     },
-    modalContent: { 
-        backgroundColor: '#ffffff', 
-        borderTopLeftRadius: 32, 
-        borderTopRightRadius: 32, 
-        padding: 24, 
-        paddingBottom: Platform.OS === 'ios' ? 40 : 24, 
-        shadowColor: '#000', 
-        shadowOffset: { width: 0, height: -8 }, 
-        shadowOpacity: 0.15, 
-        shadowRadius: 24, 
-        elevation: 20 
+    modalContent: {
+        backgroundColor: '#ffffff',
+        borderTopLeftRadius: 32,
+        borderTopRightRadius: 32,
+        padding: 24,
+        paddingBottom: Platform.OS === 'ios' ? 40 : 24,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: -8 },
+        shadowOpacity: 0.15,
+        shadowRadius: 24,
+        elevation: 20
     },
-    modalHeader: { 
-        flexDirection: 'row', 
-        justifyContent: 'space-between', 
-        alignItems: 'center', 
-        marginBottom: 32 
+    modalHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 32
     },
-    modalTitle: { 
-        fontSize: 22, 
-        fontWeight: '800', 
+    modalTitle: {
+        fontSize: 22,
+        fontWeight: '800',
         color: '#0f172a',
-        letterSpacing: -0.3 
+        letterSpacing: -0.3
     },
-    closeButton: { 
-        padding: 8, 
-        backgroundColor: '#f1f5f9', 
-        borderRadius: 20 
+    closeButton: {
+        padding: 8,
+        backgroundColor: '#f1f5f9',
+        borderRadius: 20
     },
-    modalSectionTitle: { 
-        fontSize: 17, 
-        fontWeight: '700', 
-        color: '#0f172a', 
-        marginBottom: 16 
+    modalSectionTitle: {
+        fontSize: 17,
+        fontWeight: '700',
+        color: '#0f172a',
+        marginBottom: 16
     },
-    dateScroll: { 
-        flexGrow: 0, 
-        marginBottom: 32, 
-        marginHorizontal: -24, 
-        paddingHorizontal: 24 
+    dateScroll: {
+        flexGrow: 0,
+        marginBottom: 32,
+        marginHorizontal: -24,
+        paddingHorizontal: 24
     },
-    dateCard: { 
-        width: 72, 
-        height: 90, 
-        backgroundColor: '#f8fafc', 
-        borderRadius: 20, 
-        justifyContent: 'center', 
-        alignItems: 'center', 
-        marginRight: 12, 
-        borderWidth: 1.5, 
-        borderColor: '#e2e8f0' 
+    dateCard: {
+        width: 72,
+        height: 90,
+        backgroundColor: '#f8fafc',
+        borderRadius: 20,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginRight: 12,
+        borderWidth: 1.5,
+        borderColor: '#e2e8f0'
     },
-    dateCardActive: { 
-        backgroundColor: '#1e40af', 
+    dateCardActive: {
+        backgroundColor: '#1e40af',
         borderColor: '#1e40af',
         shadowColor: '#1d4ed8',
         shadowOffset: { width: 0, height: 4 },
@@ -773,47 +776,47 @@ const styles = StyleSheet.create({
         shadowRadius: 8,
         elevation: 4
     },
-    dateDay: { 
-        fontSize: 13, 
-        color: '#64748b', 
-        marginBottom: 6, 
-        textTransform: 'uppercase', 
-        fontWeight: '700' 
+    dateDay: {
+        fontSize: 13,
+        color: '#64748b',
+        marginBottom: 6,
+        textTransform: 'uppercase',
+        fontWeight: '700'
     },
-    dateNumber: { 
-        fontSize: 22, 
-        color: '#0f172a', 
-        fontWeight: '800' 
+    dateNumber: {
+        fontSize: 22,
+        color: '#0f172a',
+        fontWeight: '800'
     },
-    dateTextActive: { 
-        color: '#ffffff' 
+    dateTextActive: {
+        color: '#ffffff'
     },
-    timeGrid: { 
-        flexDirection: 'row', 
-        flexWrap: 'wrap', 
-        gap: 12, 
-        marginBottom: 8 
+    timeGrid: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: 12,
+        marginBottom: 8
     },
-    timeSlot: { 
-        paddingVertical: 12, 
-        paddingHorizontal: 18, 
-        backgroundColor: '#f8fafc', 
-        borderRadius: 16, 
-        borderWidth: 1.5, 
-        borderColor: '#e2e8f0' 
+    timeSlot: {
+        paddingVertical: 12,
+        paddingHorizontal: 18,
+        backgroundColor: '#f8fafc',
+        borderRadius: 16,
+        borderWidth: 1.5,
+        borderColor: '#e2e8f0'
     },
-    timeSlotActive: { 
-        backgroundColor: '#eff6ff', 
-        borderColor: '#3b82f6' 
+    timeSlotActive: {
+        backgroundColor: '#eff6ff',
+        borderColor: '#3b82f6'
     },
-    timeText: { 
-        fontSize: 15, 
-        fontWeight: '600', 
-        color: '#475569' 
+    timeText: {
+        fontSize: 15,
+        fontWeight: '600',
+        color: '#475569'
     },
-    timeTextActive: { 
-        color: '#1d4ed8', 
-        fontWeight: '800' 
+    timeTextActive: {
+        color: '#1d4ed8',
+        fontWeight: '800'
     },
     confirmWrapperContainer: {
         marginTop: 24,
@@ -821,9 +824,9 @@ const styles = StyleSheet.create({
         borderTopWidth: 1,
         borderTopColor: '#f1f5f9'
     },
-    confirmWrapper: { 
-        width: '100%', 
-        borderRadius: 20, 
+    confirmWrapper: {
+        width: '100%',
+        borderRadius: 20,
         overflow: 'hidden',
         shadowColor: '#1d4ed8',
         shadowOffset: { width: 0, height: 6 },
@@ -831,55 +834,55 @@ const styles = StyleSheet.create({
         shadowRadius: 16,
         elevation: 6
     },
-    confirmDisabled: { 
+    confirmDisabled: {
         opacity: 0.6,
-        shadowOpacity: 0 
+        shadowOpacity: 0
     },
-    confirmButton: { 
-        height: 60, 
-        justifyContent: 'center', 
-        alignItems: 'center' 
+    confirmButton: {
+        height: 60,
+        justifyContent: 'center',
+        alignItems: 'center'
     },
-    confirmButtonText: { 
-        color: '#ffffff', 
-        fontSize: 17, 
+    confirmButtonText: {
+        color: '#ffffff',
+        fontSize: 17,
         fontWeight: '600',
         letterSpacing: 0.3
     },
 
-    emptyText: { 
-        color: '#64748b', 
-        textAlign: 'center', 
-        marginTop: 10, 
+    emptyText: {
+        color: '#64748b',
+        textAlign: 'center',
+        marginTop: 10,
         fontSize: 15,
-        fontWeight: '500' 
+        fontWeight: '500'
     },
-    errorText: { 
-        color: '#ef4444', 
-        textAlign: 'center', 
-        marginTop: 10, 
+    errorText: {
+        color: '#ef4444',
+        textAlign: 'center',
+        marginTop: 10,
         fontSize: 15,
-        fontWeight: '600' 
+        fontWeight: '600'
     },
 
-    fullScreenOverlay: { 
-        flex: 1, 
-        backgroundColor: 'rgba(15, 23, 42, 0.98)', 
-        justifyContent: 'center', 
-        alignItems: 'center' 
+    fullScreenOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(15, 23, 42, 0.98)',
+        justifyContent: 'center',
+        alignItems: 'center'
     },
-    fullScreenClose: { 
-        position: 'absolute', 
-        top: 60, 
-        right: 24, 
-        zIndex: 10, 
+    fullScreenClose: {
+        position: 'absolute',
+        top: 60,
+        right: 24,
+        zIndex: 10,
         padding: 12,
         backgroundColor: 'rgba(255,255,255,0.1)',
         borderRadius: 24
     },
-    fullScreenImage: { 
-        width: '100%', 
-        height: '80%' 
+    fullScreenImage: {
+        width: '100%',
+        height: '80%'
     }
 });
 

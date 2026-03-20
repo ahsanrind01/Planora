@@ -16,10 +16,9 @@ import { Search } from 'lucide-react-native';
 import { useAuthStore } from '../../core/store/authStore';
 import { useBusinessStore } from '../../core/store/businessStore';
 import ProviderCard from '../../components/ui/ProviderCard';
+import { BASE_URL } from '@/src/core/config';
 
 const categories = ["All", "Cleaning", "Beauty", "Repair", "Health", "Automative", "Education", "Other"];
-
-const SERVER_URL = "http://192.168.18.125:3000"; 
 
 export default function DiscoverScreen() {
     const navigation = useNavigation();
@@ -49,7 +48,7 @@ export default function DiscoverScreen() {
             return imagePath;
         }
         const cleanPath = imagePath.replace(/\\/g, '/').replace(/^\//, ''); 
-        return `${SERVER_URL}/${cleanPath}`;
+        return `${BASE_URL}/${cleanPath}`;
     };
 
     return (

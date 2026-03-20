@@ -8,6 +8,7 @@ import CustomerTabs from './CustomerTabs';
 import ManagerTabs from './ManagerTabs';
 import AuthStack from './AuthStack';
 import RegisterBusinessScreen from '../features/user/RegisterBusinessScreen';
+import CheckoutScreen from '../features/payment/CheckoutScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -27,6 +28,12 @@ export default function AppNavigator() {
 
                 <Stack.Screen name="Auth" component={AuthStack} options={{ presentation: 'modal' }} />
                 <Stack.Screen name="RegisterBusiness" component={RegisterBusinessScreen} options={{ presentation: 'modal' }} />
+
+                <Stack.Screen 
+                    name="Checkout" 
+                    component={CheckoutScreen} 
+                    options={{ presentation: 'modal' }} 
+                />
                 
             </Stack.Navigator>
         </NavigationContainer>

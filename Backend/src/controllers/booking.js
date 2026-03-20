@@ -1,3 +1,9 @@
+import Stripe from 'stripe';
+import dotenv from 'dotenv';
+dotenv.config();
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+
 import eventBus from '../utils/eventBus.js';
 
 import Booking from '../models/booking.js';
@@ -8,7 +14,7 @@ import Schedule from '../models/schedule.js';
 
 export const createBooking = async (req, res) => {
     try {
-        const { serviceId, date } = req.body;
+        const { serviceId, date, paymentStatus , stripePaymentId } = req.body;
 
         const service = await Service.findById(serviceId);
         if (!service) {
@@ -66,6 +72,8 @@ export const createBooking = async (req, res) => {
             date: startTime,
             endTime: endTime,
             status: 'pending',
+            paymentStatus: paymentStatus || 'unpaid', 
+            stripePaymentId: stripePaymentId || null,
         });
 
         const user = await User.findById(req.user._id);
@@ -102,6 +110,21 @@ export const cancelBooking = async (req, res) => {
 
         if (booking.userId.toString() !== req.user._id.toString()) {
             return res.status(403).json({ message: 'Not authorized to cancel this booking' });
+        }
+
+        if (booking.paymentStatus === 'paid' && booking.stripePaymentId) {
+            try {
+                await stripe.refunds.create({
+                    payment_intent: booking.stripePaymentId,
+                });
+                
+                booking.paymentStatus = 'refunded';
+            } catch (stripeError) {
+                console.error("🚨 Stripe Refund Error:", stripeError.message);
+                return res.status(500).json({ 
+                    message: 'Cancellation failed: Could not process the refund.' 
+                });
+            }
         }
 
         booking.status = 'cancelled';

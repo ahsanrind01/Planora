@@ -34,12 +34,14 @@ export const useAppointmentStore = create((set) => ({
         }
     },
 
-    submitBooking: async (serviceId, finalDateString, selectedTime) => {
+    submitBooking: async (serviceId, finalDateString, selectedTime, paymentStatus = 'unpaid',stripePaymentId = null) => {
         set({ isLoading: true, error: null });
         try {
             const response = await apiClient.post('/bookings/create', {
                 serviceId: serviceId,
-                date: finalDateString 
+                date: finalDateString,
+                paymentStatus: paymentStatus ,
+                stripePaymentId: stripePaymentId
             });
 
             set((state) => ({ isLoading: false }));
@@ -50,6 +52,7 @@ export const useAppointmentStore = create((set) => ({
             return { success: false, message: error.response?.data?.message };
         }
     },
+
     cancelBooking: async (bookingId) => {
         set({ isLoading: true });
         try {
