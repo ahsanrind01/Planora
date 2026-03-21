@@ -9,6 +9,8 @@ import ManagerTabs from './ManagerTabs';
 import AuthStack from './AuthStack';
 import RegisterBusinessScreen from '../features/user/RegisterBusinessScreen';
 import CheckoutScreen from '../features/payment/CheckoutScreen';
+import ChatScreen from '../features/chat/ChatScreen';
+import ManagerInboxScreen from '../features/manager/ManagerInboxScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -19,7 +21,7 @@ export default function AppNavigator() {
     return (
         <NavigationContainer>
             <Stack.Navigator screenOptions={{ headerShown: false }}>
-                
+
                 {isManager ? (
                     <Stack.Screen name="ManagerApp" component={ManagerTabs} />
                 ) : (
@@ -29,12 +31,23 @@ export default function AppNavigator() {
                 <Stack.Screen name="Auth" component={AuthStack} options={{ presentation: 'modal' }} />
                 <Stack.Screen name="RegisterBusiness" component={RegisterBusinessScreen} options={{ presentation: 'modal' }} />
 
-                <Stack.Screen 
-                    name="Checkout" 
-                    component={CheckoutScreen} 
-                    options={{ presentation: 'modal' }} 
+                <Stack.Screen
+                    name="Checkout"
+                    component={CheckoutScreen}
+                    options={{ presentation: 'modal' }}
                 />
-                
+
+                <Stack.Screen
+                    name="ChatScreen"
+                    component={ChatScreen}
+                    options={{ headerShown: false }}
+                />
+                <Stack.Screen
+                    name="ManagerInbox"
+                    component={ManagerInboxScreen}
+                    options={{ headerShown: false }}
+                />
+
             </Stack.Navigator>
         </NavigationContainer>
     );

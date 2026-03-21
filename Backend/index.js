@@ -1,6 +1,9 @@
 import dotenv from 'dotenv'
 dotenv.config();
 
+import http from 'http';
+import { initSocket } from './src/utils/socket.js'; 
+
 import { fileURLToPath } from 'url';
 import path from 'path';
 import cors from 'cors'; 
@@ -17,6 +20,7 @@ import bookingRoutes from './src/routes/booking.js';
 import scheduleRoutes from './src/routes/schedule.js';
 import reviewRoutes from './src/routes/review.js';
 import paymentRoutes from './src/routes/payment.js';
+import chatRoutes from './src/routes/chat.js';
 
 // Subscribers & Events
 import './src/subscribers/bookingSubscriber.js';
@@ -29,6 +33,9 @@ const __dirname = path.dirname(__filename)
 connectToMongoDB(); 
 
 const app = express();
+
+const server = http.createServer(app); 
+initSocket(server);
 
 app.use(cors()); 
 app.use(express.json())
@@ -43,8 +50,9 @@ app.use('/api/bookings', bookingRoutes)
 app.use('/api/schedule', scheduleRoutes)
 app.use('/api/reviews', reviewRoutes)
 app.use('/api/payments', paymentRoutes);
+app.use('/api/chat', chatRoutes);
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+server.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });

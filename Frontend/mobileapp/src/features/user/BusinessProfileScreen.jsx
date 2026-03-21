@@ -14,7 +14,11 @@ import {
 } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { ArrowLeft, MapPin, Star, X, Phone, BadgeCheck } from 'lucide-react-native';
+// 1. Add MessageCircle here:
+import { ArrowLeft, MapPin, Star, X, Phone, BadgeCheck, MessageCircle } from 'lucide-react-native';
+
+// 2. Add your apiClient right below your other imports:
+import { apiClient } from '../../core/api/apiClient';
 
 // Stores
 import { useAuthStore } from '../../core/store/authStore';
@@ -168,6 +172,20 @@ const handleConfirmBooking = async () => {
         return `${BASE_URL}/${cleanPath}`;
     };
 
+    const handleMessageBusiness = async () => {
+        if (!user) return navigation.navigate('Auth');
+        try {
+            const response = await apiClient.post('/chat/initiate', { businessId: providerId });
+            navigation.navigate('ChatScreen', {
+                conversationId: response.data.data._id,
+                receiverName: business?.name || "Business",
+                receiverId: providerId
+            });
+        } catch (error) {
+            console.error("Could not open chat:", error);
+        }
+    };
+
     return (
         <View style={styles.container}>
             <ScrollView showsVerticalScrollIndicator={false} bounces={false}>
@@ -193,6 +211,14 @@ const handleConfirmBooking = async () => {
                             activeOpacity={0.7}
                         >
                             <ArrowLeft color="#0f172a" size={22} strokeWidth={2.5} />
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                            style={styles.chatButton}
+                            onPress={handleMessageBusiness}
+                            activeOpacity={0.7}
+                        >
+                            <MessageCircle color="#2563eb" size={22} strokeWidth={2.5} />
                         </TouchableOpacity>
                     </SafeAreaView>
                 </View>
@@ -483,7 +509,12 @@ const styles = StyleSheet.create({
         position: 'absolute', bottom: 0, left: 0, right: 0, height: 120
     },
     safeArea: {
-        position: 'absolute', top: 0, left: 0, right: 0
+        position: 'absolute', 
+        top: 0, 
+        left: 0, 
+        right: 0,
+        flexDirection: 'row',
+        justifyContent: 'space-between'
     },
     backButton: {
         width: 48,
@@ -883,6 +914,21 @@ const styles = StyleSheet.create({
     fullScreenImage: {
         width: '100%',
         height: '80%'
-    }
+    },
+    chatButton: {
+        width: 48,
+        height: 48,
+        backgroundColor: 'rgba(255, 255, 255, 0.85)',
+        borderRadius: 24,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginRight: 24,
+        marginTop: Platform.OS === 'android' ? 40 : 10,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.15,
+        shadowRadius: 12,
+        elevation: 5
+    },
 });
 

@@ -11,15 +11,18 @@ import {
     Alert,
     Platform
 } from 'react-native';
-import { useFocusEffect } from '@react-navigation/native';
+// 1. ADDED: useNavigation
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Users, CalendarCheck, TrendingUp, Clock, Check, X } from 'lucide-react-native';
+// 2. ADDED: MessageCircle icon
+import { Users, CalendarCheck, TrendingUp, Clock, Check, X, MessageCircle } from 'lucide-react-native';
 
 import { useAuthStore } from '../../core/store/authStore';
 import { apiClient } from '../../core/api/apiClient';
 
 export default function ManagerDashboardScreen() {
     const user = useAuthStore(state => state.user);
+    const navigation = useNavigation(); // 3. ADDED: Navigation hook
 
     const [isLoading, setIsLoading] = useState(true);
     const [appointments, setAppointments] = useState([]);
@@ -39,7 +42,6 @@ export default function ManagerDashboardScreen() {
         }
 
         try {
-            // Safe URL without the trailing slash
             const response = await apiClient.get(`/bookings/business`);
             const data = response.data?.data || [];
 
@@ -53,14 +55,12 @@ export default function ManagerDashboardScreen() {
             data.forEach(apt => {
                 const safeStatus = String(apt.status || '').toLowerCase().trim();
 
-                // Count Confirmed/Completed for official stats
                 if (safeStatus === 'confirmed' || safeStatus === 'completed') {
                     confirmedCount += 1; 
                     revenue += (apt.serviceId?.price || 0);
                     if (apt.userId?._id) uniqueCustomers.add(apt.userId._id);
                 }
 
-                // Count Pending requests
                 if (safeStatus === 'pending') {
                     pendingCount += 1;
                 }
@@ -98,7 +98,7 @@ export default function ManagerDashboardScreen() {
     const handleUpdateStatus = async (id, newStatus) => {
         try {
             await apiClient.patch(`/bookings/${id}/status`, { status: newStatus });
-            fetchDashboardData(); // Refresh stats instantly
+            fetchDashboardData(); 
         } catch (error) {
             Alert.alert("Error", "Failed to update booking status.");
         }
@@ -116,8 +116,22 @@ export default function ManagerDashboardScreen() {
                             <View style={[styles.circle, styles.circleTopRight]} />
                             <View style={[styles.circle, styles.circleBottomLeft]} />
 
-                            <Text style={styles.greeting}>Welcome back,</Text>
-                            <Text style={styles.managerName}>{user?.name || 'Manager'} </Text>
+                            {/* 4. ADDED: Row to hold text on left and Inbox button on right */}
+                            <View style={styles.headerTopRow}>
+                                <View>
+                                    <Text style={styles.greeting}>Welcome back,</Text>
+                                    <Text style={styles.managerName}>{user?.name || 'Manager'} </Text>
+                                </View>
+                                
+                                <TouchableOpacity
+                                    style={styles.inboxButton}
+                                    activeOpacity={0.8}
+                                    onPress={() => navigation.navigate('ManagerInbox')}
+                                >
+                                    <MessageCircle color="#ffffff" size={24} strokeWidth={2.5} />
+                                </TouchableOpacity>
+                            </View>
+
                         </View>
                     </SafeAreaView>
                 </LinearGradient>
@@ -255,6 +269,23 @@ const styles = StyleSheet.create({
         paddingHorizontal: 24,
         paddingTop: Platform.OS === 'android' ? 40 : 26
     },
+    
+    // 5. ADDED: Styles for the new top row layout
+    headerTopRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
+    inboxButton: {
+        width: 46,
+        height: 46,
+        borderRadius: 23,
+        backgroundColor: 'rgba(255, 255, 255, 0.15)', // Frosted glass effect
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom: 8 // Adjusts alignment with the large manager text
+    },
+
     circle:{
         position: 'absolute',
         backgroundColor: 'rgba(255,255,255,0.07)',
@@ -351,7 +382,6 @@ const styles = StyleSheet.create({
         fontWeight: '600' 
     },
 
-   
     scheduleContainer: { 
         paddingHorizontal: 24, 
         marginTop: 32 

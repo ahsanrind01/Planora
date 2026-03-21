@@ -12,10 +12,11 @@ import {
 } from 'react-native';
 import { useFocusEffect, useNavigation } from '@react-navigation/native'; 
 import { LinearGradient } from 'expo-linear-gradient';
-import { Calendar, Clock, MapPin, Lock, CalendarX2 } from 'lucide-react-native'; 
+import { Calendar, Clock, MapPin, Lock, CalendarX2, MessageCircle } from 'lucide-react-native'; 
 
 import { useAppointmentStore } from '../../core/store/appointmentStore';
 import { useAuthStore } from '../../core/store/authStore'; 
+import { apiClient } from '../../core/api/apiClient'; 
 
 export default function AppointmentsScreen() {
     const navigation = useNavigation();
@@ -33,6 +34,22 @@ export default function AppointmentsScreen() {
         }, [user])
     );
 
+    const handleMessageBusiness = async (businessId, businessName) => {
+        try {
+            const response = await apiClient.post('/chat/initiate', { businessId });
+            const conversationId = response.data.data._id;
+
+            navigation.navigate('ChatScreen', {
+                conversationId: conversationId,
+                receiverName: businessName,
+                receiverId: businessId
+            });
+        } catch (error) {
+            console.error("🚨 Could not open chat:", error);
+            Alert.alert("Error", "Could not start chat with the business.");
+        }
+    };
+
     const upcomingAppointments = appointments.filter(app =>
         app.status !== 'completed' && app.status !== 'cancelled'
     );
@@ -45,10 +62,8 @@ export default function AppointmentsScreen() {
     const formatDateTime = (isoString) => {
         if (!isoString) return { date: "TBD", time: "TBD" };
         const d = new Date(isoString);
-
         const dateStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
         const timeStr = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
-
         return { date: dateStr, time: timeStr };
     };
 
@@ -78,17 +93,13 @@ export default function AppointmentsScreen() {
     };
 
     const getPaymentBadgeStyle = (status) => {
-    switch (status) {
-        case 'paid':
-            return { backgroundColor: '#dcfce7', color: '#166534' }; 
-        case 'unpaid':
-            return { backgroundColor: '#fef9c3', color: '#854d0e' }; 
-        case 'refunded':
-            return { backgroundColor: '#f1f5f9', color: '#475569' }; 
-        default:
-            return { backgroundColor: '#f1f5f9', color: '#475569' };
-    }
-};
+        switch (status) {
+            case 'paid': return { backgroundColor: '#dcfce7', color: '#166534' }; 
+            case 'unpaid': return { backgroundColor: '#fef9c3', color: '#854d0e' }; 
+            case 'refunded': return { backgroundColor: '#f1f5f9', color: '#475569' }; 
+            default: return { backgroundColor: '#f1f5f9', color: '#475569' };
+        }
+    };
 
     if (!user) {
         return (
@@ -96,18 +107,9 @@ export default function AppointmentsScreen() {
                 <View style={styles.bouncerIconBox}>
                     <Lock color="#1e40af" size={40} strokeWidth={2} />
                 </View>
-                <Text style={styles.bouncerTitle}>
-                    Your Bookings
-                </Text>
-                <Text style={styles.bouncerSubtitle}>
-                    Log in or sign up to view and manage your upcoming bookings.
-                </Text>
-                
-                <TouchableOpacity 
-                    style={styles.bouncerButtonWrapper}
-                    activeOpacity={0.8}
-                    onPress={() => navigation.navigate('Auth')}
-                >
+                <Text style={styles.bouncerTitle}>Your Bookings</Text>
+                <Text style={styles.bouncerSubtitle}>Log in or sign up to view and manage your upcoming bookings.</Text>
+                <TouchableOpacity style={styles.bouncerButtonWrapper} activeOpacity={0.8} onPress={() => navigation.navigate('Auth')}>
                     <LinearGradient colors={['#1e40af', '#3b82f6']} style={styles.bouncerButton}>
                         <Text style={styles.bouncerButtonText}>Log In / Sign Up</Text>
                     </LinearGradient>
@@ -123,27 +125,13 @@ export default function AppointmentsScreen() {
                     <View style={styles.headerContent}>
                         <View style={[styles.circle, styles.circleTopRight]} />
                         <View style={[styles.circle, styles.circleBottomLeft]} />
-
                         <Text style={styles.title}>My Bookings</Text>
-
                         <View style={styles.segmentedControl}>
-                            <TouchableOpacity
-                                activeOpacity={0.7}
-                                style={[styles.tabButton, activeTab === "upcoming" && styles.tabButtonActive]}
-                                onPress={() => setActiveTab("upcoming")}
-                            >
-                                <Text style={[styles.tabText, activeTab === "upcoming" && styles.tabTextActive]}>
-                                    Upcoming ({upcomingAppointments.length})
-                                </Text>
+                            <TouchableOpacity activeOpacity={0.7} style={[styles.tabButton, activeTab === "upcoming" && styles.tabButtonActive]} onPress={() => setActiveTab("upcoming")}>
+                                <Text style={[styles.tabText, activeTab === "upcoming" && styles.tabTextActive]}>Upcoming ({upcomingAppointments.length})</Text>
                             </TouchableOpacity>
-                            <TouchableOpacity
-                                activeOpacity={0.7}
-                                style={[styles.tabButton, activeTab === "past" && styles.tabButtonActive]}
-                                onPress={() => setActiveTab("past")}
-                            >
-                                <Text style={[styles.tabText, activeTab === "past" && styles.tabTextActive]}>
-                                    Past ({pastAppointments.length})
-                                </Text>
+                            <TouchableOpacity activeOpacity={0.7} style={[styles.tabButton, activeTab === "past" && styles.tabButtonActive]} onPress={() => setActiveTab("past")}>
+                                <Text style={[styles.tabText, activeTab === "past" && styles.tabTextActive]}>Past ({pastAppointments.length})</Text>
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -181,19 +169,10 @@ export default function AppointmentsScreen() {
                                         </View>
                                         <View style={styles.badgeRow}>
                                             <View style={[styles.statusBadge, { backgroundColor: statusStyle.bg }]}>
-                                                <Text style={[styles.statusText, { color: statusStyle.text }]}>
-                                                    {appointment.status || "Pending"}
-                                                </Text>
+                                                <Text style={[styles.statusText, { color: statusStyle.text }]}>{appointment.status || "Pending"}</Text>
                                             </View>
-
-                                            <View style={[
-                                                styles.statusBadge, 
-                                                { backgroundColor: getPaymentBadgeStyle(appointment.paymentStatus).backgroundColor, marginLeft: 8 }
-                                            ]}>
-                                                <Text style={[
-                                                    styles.statusText, 
-                                                    { color: getPaymentBadgeStyle(appointment.paymentStatus).color }
-                                                ]}>
+                                            <View style={[styles.statusBadge, { backgroundColor: getPaymentBadgeStyle(appointment.paymentStatus).backgroundColor, marginLeft: 8 }]}>
+                                                <Text style={[styles.statusText, { color: getPaymentBadgeStyle(appointment.paymentStatus).color }]}>
                                                     {appointment.paymentStatus ? appointment.paymentStatus.toUpperCase() : 'UNPAID'}
                                                 </Text>
                                             </View>
@@ -216,15 +195,27 @@ export default function AppointmentsScreen() {
                                         <Text style={styles.addressText}>{businessAddress}</Text>
                                     </View>
 
-                                    {activeTab === "upcoming" && (
+                                    <View style={styles.actionButtonsRow}>
                                         <TouchableOpacity
+                                            activeOpacity={0.7}
+                                            style={styles.chatButton}
+                                            onPress={() => handleMessageBusiness(appointment.businessId?._id, businessName)}
+                                        >
+                                            <MessageCircle color="#3b82f6" size={18} style={{ marginRight: 6 }} />
+                                            <Text style={styles.chatButtonText}>Message</Text>
+                                        </TouchableOpacity>
+
+                                        {activeTab === "upcoming" && (
+                                            <TouchableOpacity
                                             activeOpacity={0.7}
                                             style={styles.cancelButton}
                                             onPress={() => handleCancel(appointment._id)}
-                                        >
-                                            <Text style={styles.cancelButtonText}>Cancel Appointment</Text>
-                                        </TouchableOpacity>
-                                    )}
+                                            >
+                                                <Text style={styles.cancelButtonText}>Cancel</Text>
+                                            </TouchableOpacity>
+                                        )}
+                                    </View>
+
                                 </View>
                             );
                         })}
@@ -478,6 +469,7 @@ const styles = StyleSheet.create({
     },
     
     cancelButton: { 
+        flex: 1,
         width: '100%', 
         paddingVertical: 14, 
         borderRadius: 14, 
@@ -507,5 +499,27 @@ const styles = StyleSheet.create({
         fontSize: 12,
         fontWeight: 'bold',
         letterSpacing: 0.5,
+    },
+    actionButtonsRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginTop: 15,
+        gap: 10,
+    },
+    chatButton: {
+        flex: 1,
+        flexDirection: 'row',
+        backgroundColor: '#eff6ff', 
+        paddingVertical: 12,
+        borderRadius: 8,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: '#bfdbfe',
+    },
+    chatButtonText: {
+        color: '#3b82f6',
+        fontWeight: '600',
+        fontSize: 14,
     },
 });
