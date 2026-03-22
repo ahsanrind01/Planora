@@ -11,10 +11,8 @@ import {
     Alert,
     Platform
 } from 'react-native';
-// 1. ADDED: useNavigation
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
-// 2. ADDED: MessageCircle icon
 import { Users, CalendarCheck, TrendingUp, Clock, Check, X, MessageCircle } from 'lucide-react-native';
 
 import { useAuthStore } from '../../core/store/authStore';
@@ -22,7 +20,7 @@ import { apiClient } from '../../core/api/apiClient';
 
 export default function ManagerDashboardScreen() {
     const user = useAuthStore(state => state.user);
-    const navigation = useNavigation(); // 3. ADDED: Navigation hook
+    const navigation = useNavigation(); 
 
     const [isLoading, setIsLoading] = useState(true);
     const [appointments, setAppointments] = useState([]);
@@ -270,7 +268,6 @@ const styles = StyleSheet.create({
         paddingTop: Platform.OS === 'android' ? 40 : 26
     },
     
-    // 5. ADDED: Styles for the new top row layout
     headerTopRow: {
         flexDirection: 'row',
         justifyContent: 'space-between',
@@ -280,10 +277,10 @@ const styles = StyleSheet.create({
         width: 46,
         height: 46,
         borderRadius: 23,
-        backgroundColor: 'rgba(255, 255, 255, 0.15)', // Frosted glass effect
+        backgroundColor: 'rgba(255, 255, 255, 0.15)', 
         justifyContent: 'center',
         alignItems: 'center',
-        marginBottom: 8 // Adjusts alignment with the large manager text
+        marginBottom: 8 
     },
 
     circle:{
@@ -330,7 +327,7 @@ const styles = StyleSheet.create({
     },
     sectionTitle: { 
         fontSize: 21, 
-        fontWeight: '800', 
+        fontWeight: '700', 
         color: '#020617', 
         marginBottom: 16,
         letterSpacing: -0.3 
@@ -417,7 +414,7 @@ const styles = StyleSheet.create({
     },
     aptTime: { 
         fontSize: 15, 
-        fontWeight: '800', 
+        fontWeight: '700', 
         color: '#0f172a' 
     },
     aptDate: { 

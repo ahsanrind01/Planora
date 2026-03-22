@@ -18,7 +18,7 @@ export default function ManagerTabs() {
                 tabBarActiveTintColor: '#2563eb', 
                 tabBarInactiveTintColor: '#94a3b8', 
                 tabBarStyle: { 
-                    height: Platform.OS === 'ios' ? 88 : 68, 
+                    height: Platform.OS === 'ios' ? 75 : 68, 
                     paddingBottom: Platform.OS === 'ios' ? 28 : 12, 
                     paddingTop: 12,
                     backgroundColor: '#ffffff',

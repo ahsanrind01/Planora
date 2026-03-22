@@ -291,7 +291,7 @@ const styles = StyleSheet.create({
     },
     headerTitle: { 
         fontSize: 28, 
-        fontWeight: '800', 
+        fontWeight: '700', 
         color: '#ffffff',
         letterSpacing: -0.5 
     },
@@ -335,14 +335,15 @@ const styles = StyleSheet.create({
     dayInfo: { 
         flexDirection: 'row', 
         alignItems: 'center', 
-        width: 150 
+        flex: 1, // 🚨 FIX: Replaced fixed width with flex so it shrinks if needed
     },
     dayText: { 
-        fontSize: 16, 
-        fontWeight: '700', 
+        fontSize: 15, 
+        fontWeight: '600', 
         color: '#0f172a', 
-        marginLeft: 14,
-        letterSpacing: 0.2
+        marginLeft: 10, // 🚨 FIX: Slightly reduced to give time boxes more room
+        letterSpacing: 0.2,
+        flexShrink: 1, // 🚨 FIX: Stops long day names like "Wednesday" from pushing the boxes
     },
     dayTextClosed: { 
         color: '#94a3b8',
@@ -351,22 +352,22 @@ const styles = StyleSheet.create({
     timeContainer: { 
         flexDirection: 'row', 
         alignItems: 'center', 
-        flex: 1, 
+        // 🚨 FIX: Removed flex: 1 so it only takes up the space it actually needs
         justifyContent: 'flex-end' 
     },
     timeButton: { 
         backgroundColor: '#f8fafc', 
-        paddingHorizontal: 12, 
+        paddingHorizontal: 8, // 🚨 FIX: Reduced from 12
         paddingVertical: 10, 
         borderRadius: 12, 
         borderWidth: 1.5, 
         borderColor: '#e2e8f0',
-        minWidth: 80,
+        minWidth: 70, // 🚨 FIX: Reduced from 80 so it fits on Android screens
         alignItems: 'center'
     },
     timeText: { 
         fontSize: 14, 
-        fontWeight: '700', 
+        fontWeight: '600', 
         color: '#1e40af' 
     },
     timeDivider: { 

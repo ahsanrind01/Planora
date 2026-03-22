@@ -275,7 +275,7 @@ const styles = StyleSheet.create({
     },
     headerTitle: { 
         fontSize: 28, 
-        fontWeight: '800', 
+        fontWeight: '700', 
         color: '#ffffff',
         letterSpacing: -0.5 
     },
@@ -340,7 +340,7 @@ const styles = StyleSheet.create({
     },
     serviceName: { 
         fontSize: 19, 
-        fontWeight: '800', 
+        fontWeight: '700', 
         color: '#0f172a', 
         marginBottom: 6,
         letterSpacing: -0.3 
@@ -474,7 +474,7 @@ const styles = StyleSheet.create({
     submitButtonText: { 
         color: '#ffffff', 
         fontSize: 17, 
-        fontWeight: '800',
+        fontWeight: '700',
         letterSpacing: 0.5 
     }
 });
