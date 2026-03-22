@@ -26,9 +26,9 @@ export const updateProfile = async (req, res) => {
     try {
         const { name, email } = req.body;
 
-        const duplicateUser = await User.findOne({ 
+        const duplicateUser = await User.findOne({
             email: email,
-            _id: {$ne: req.user._id}
+            _id: { $ne: req.user._id }
         });
         if (duplicateUser) {
             return res.status(400).json({ message: 'this email is already taken' })
@@ -40,8 +40,8 @@ export const updateProfile = async (req, res) => {
                 email,
             },
             {
-                new : true,
-                runValidators: true 
+                new: true,
+                runValidators: true
             }
         )
 
@@ -81,7 +81,7 @@ export const updatePassword = async (req, res) => {
             return res.status(404).json({ message: 'User not found' });
         }
         const isMatch = await bcrypt.compare(currentPassword, user.password);
-        
+
         if (!isMatch) {
             return res.status(401).json({ message: 'The current password you entered is incorrect.' });
         }
@@ -109,20 +109,25 @@ export const updatePassword = async (req, res) => {
 
 export const savePushToken = async (req, res) => {
     try {
-        const { pushToken } = req.body;
-
-        const userId = req.user.id; 
+        const pushToken = req.body.pushToken || req.body.token;
+        const userId = req.user._id || req.user.id;
 
         if (!pushToken) {
             return res.status(400).json({ message: "Push token is required" });
         }
 
-        await User.findByIdAndUpdate(userId, { pushToken }, { new: true });
+        const updatedUser = await User.findByIdAndUpdate(
+            userId,
+            { expoPushToken: pushToken },
+            { new: true }
+        );
+
+        if (!updatedUser) {
+            return res.status(404).json({ message: "User not found" });
+        }
 
         res.status(200).json({ success: true, message: "Push token safely stored!" });
     } catch (error) {
-        console.error("🚨 Error saving push token:", error);
         res.status(500).json({ message: "Server error", error: error.message });
     }
 };
-

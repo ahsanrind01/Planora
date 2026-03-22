@@ -12,6 +12,8 @@ import Service from '../models/service.js';
 import Business from '../models/business.js';
 import Schedule from '../models/schedule.js';
 
+import { sendPushNotification } from '../utils/pushNotifications.js'; 
+
 export const createBooking = async (req, res) => {
     try {
         const { serviceId, date, paymentStatus , stripePaymentId } = req.body;
@@ -88,6 +90,19 @@ export const createBooking = async (req, res) => {
             pushToken: user.pushToken 
         };
 
+        try {
+            const bizOwner = await User.findById(business.owner);
+            if (bizOwner && bizOwner.expoPushToken) {
+                await sendPushNotification(
+                    bizOwner.expoPushToken,
+                    "📅 New Booking Request!",
+                    `${user.name} just requested an appointment for a ${service.name}.`,
+                    { bookingId: booking._id }
+                );
+            }
+        } catch (pushErr) {
+        }
+
         res.status(201).json({
             success: true,
             data: booking
@@ -120,7 +135,6 @@ export const cancelBooking = async (req, res) => {
                 
                 booking.paymentStatus = 'refunded';
             } catch (stripeError) {
-                console.error("🚨 Stripe Refund Error:", stripeError.message);
                 return res.status(500).json({ 
                     message: 'Cancellation failed: Could not process the refund.' 
                 });
@@ -129,6 +143,22 @@ export const cancelBooking = async (req, res) => {
 
         booking.status = 'cancelled';
         await booking.save();
+
+        try {
+            const canceledBusiness = await Business.findById(booking.businessId);
+            const bizOwner = await User.findById(canceledBusiness.owner);
+            const customer = await User.findById(booking.userId);
+
+            if (bizOwner && bizOwner.expoPushToken) {
+                await sendPushNotification(
+                    bizOwner.expoPushToken,
+                    "❌ Booking Cancelled",
+                    `${customer.name} just cancelled their upcoming appointment.`,
+                    { bookingId: booking._id }
+                );
+            }
+        } catch (pushErr) {
+        }
 
         res.status(200).json({
             success: true,
@@ -154,7 +184,6 @@ export const getBookings = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
-
 
 export const getBusinessBookings = async (req, res) => {
     try {
@@ -193,6 +222,23 @@ export const updateBookingStatus = async (req, res) => {
 
         booking.status = status;
         await booking.save();
+
+        try {
+            const customer = await User.findById(booking.userId);
+            if (customer && customer.expoPushToken) {
+                const statusMessage = status === 'confirmed' 
+                    ? "✅ Your appointment was confirmed!" 
+                    : `⚠️ Your appointment status is now: ${status}.`;
+
+                await sendPushNotification(
+                    customer.expoPushToken,
+                    "Appointment Update",
+                    statusMessage,
+                    { bookingId: booking._id }
+                );
+            }
+        } catch (pushErr) {
+        }
 
         res.status(200).json({
             success: true,

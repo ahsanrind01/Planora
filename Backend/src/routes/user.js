@@ -7,6 +7,6 @@ const router = express.Router()
 router.get('/me',protect,getMe)
 router.put('/profile',protect, updateProfile)
 router.put('/password',protect,updatePassword)
-router.put('/push-token', protect, savePushToken);
+router.post('/push-token', protect, savePushToken);
 
 export default router;

@@ -3,6 +3,9 @@ import Message from '../models/message.js';
 import Business from '../models/business.js'; 
 import eventBus from '../utils/eventBus.js';
 
+import User from '../models/user.js';
+import { sendPushNotification } from '../utils/pushNotifications.js';
+
 export const getConversations = async (req, res) => {
     try {
         const userId = req.user._id;
@@ -35,6 +38,8 @@ export const getConversations = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+
+
 export const getMessages = async (req, res) => {
     try {
         const { conversationId } = req.params;
@@ -67,6 +72,31 @@ export const sendMessage = async (req, res) => {
         res.status(201).json({ success: true, data: newMessage });
 
         eventBus.emit('newMessage', { message: newMessage, receiverId });
+
+        const conversation = await Conversation.findById(conversationId).populate('businessId');
+        
+        let targetUserId;
+        
+        if (String(req.user._id) === String(conversation.customerId)) {
+            targetUserId = conversation.businessId.owner;
+        } else {
+            targetUserId = conversation.customerId;
+        }
+
+        const receiver = await User.findById(targetUserId);
+
+        if (!receiver) {
+        } else if (!receiver.expoPushToken) {
+        } else {
+            const senderName = req.user.name || "Someone"; 
+            
+            await sendPushNotification(
+                receiver.expoPushToken, 
+                `New message from ${senderName}`, 
+                text,                             
+                { conversationId }                
+            );
+        }
 
     } catch (error) {
         res.status(500).json({ message: error.message });

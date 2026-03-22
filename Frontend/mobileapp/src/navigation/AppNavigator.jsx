@@ -4,6 +4,8 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import { useAuthStore } from '../core/store/authStore';
 
+import { usePushNotifications } from '../hooks/usePushNotifications';
+
 import CustomerTabs from './CustomerTabs';
 import ManagerTabs from './ManagerTabs';
 import AuthStack from './AuthStack';
@@ -17,6 +19,8 @@ const Stack = createNativeStackNavigator();
 export default function AppNavigator() {
     const user = useAuthStore((state) => state.user);
     const isManager = user?.role === 'manager';
+
+    usePushNotifications();
 
     return (
         <NavigationContainer>
